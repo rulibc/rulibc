@@ -3,10 +3,20 @@
 macro_rules! platform_specific {
     ($($arch:expr,$ext:expr;)+) => {
         $(
+            #[cfg(not(target_os = "windows"))]
             #[cfg(target_arch = $arch)]
             global_asm!(include_str!(concat!("impl/", $arch, "/setjmp.", $ext)));
+            #[cfg(not(target_os = "windows"))]
             #[cfg(target_arch = $arch)]
             global_asm!(include_str!(concat!("impl/", $arch, "/longjmp.", $ext)));
+
+            #[cfg(target_os = "windows")]
+            #[cfg(target_arch = $arch)]
+            global_asm!(include_str!(concat!("impl/", $arch, "_win/setjmp.", $ext)));
+            #[cfg(target_os = "windows")]
+            #[cfg(target_arch = $arch)]
+            global_asm!(include_str!(concat!("impl/", $arch, "_win/longjmp.", $ext)));
+
         )+
     }
 }
