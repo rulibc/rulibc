@@ -1,11 +1,9 @@
 #![allow(missing_copy_implementations)]
 
-#[cfg(test)]
-mod tests;
-
-use crate::fmt;
-use crate::io::{self, BufRead, ErrorKind, Initializer, IoSlice, IoSliceMut, Read, Write};
-use crate::mem::MaybeUninit;
+use core::fmt;
+use io::{self, Read, Initializer, Write, ErrorKind, IoSlice, IoSliceMut};
+use core::mem::MaybeUninit;
+ use io::BufRead;
 
 /// Copies the entire contents of a reader into a writer.
 ///
@@ -45,7 +43,6 @@ use crate::mem::MaybeUninit;
 ///     Ok(())
 /// }
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn copy<R: ?Sized, W: ?Sized>(reader: &mut R, writer: &mut W) -> io::Result<u64>
 where
     R: Read,
@@ -60,19 +57,24 @@ where
     //   - Only the standard library gets to soundly "ignore" this,
     //     based on its privileged knowledge of unstable rustc
     //     internals;
+    let buf_u8: &mut [u8];
     unsafe {
-        reader.initializer().initialize(buf.assume_init_mut());
+        buf_u8 = core::slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, super::DEFAULT_BUF_SIZE);
+        reader.initializer().initialize(buf_u8);
     }
 
     let mut written = 0;
     loop {
-        let len = match reader.read(unsafe { buf.assume_init_mut() }) {
+        let len = match reader.read(buf_u8) {
             Ok(0) => return Ok(written),
             Ok(len) => len,
             Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
             Err(e) => return Err(e),
         };
-        writer.write_all(unsafe { &buf.assume_init_ref()[..len] })?;
+        unsafe {
+            let buf_u8_to_write: &mut [u8] = core::slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, len);
+            writer.write_all(buf_u8_to_write)?;
+        }
         written += len as u64;
     }
 }
@@ -81,7 +83,6 @@ where
 ///
 /// This struct is generally created by calling [`empty()`]. Please see
 /// the documentation of [`empty()`] for more details.
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Empty {
     _priv: (),
 }
@@ -101,12 +102,10 @@ pub struct Empty {
 /// io::empty().read_to_string(&mut buffer).unwrap();
 /// assert!(buffer.is_empty());
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn empty() -> Empty {
     Empty { _priv: () }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Read for Empty {
     #[inline]
     fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
@@ -118,7 +117,6 @@ impl Read for Empty {
         Initializer::nop()
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
 impl BufRead for Empty {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> {
@@ -128,7 +126,6 @@ impl BufRead for Empty {
     fn consume(&mut self, _n: usize) {}
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Empty {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("Empty { .. }")
@@ -139,7 +136,6 @@ impl fmt::Debug for Empty {
 ///
 /// This struct is generally created by calling [`repeat()`]. Please
 /// see the documentation of [`repeat()`] for more details.
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Repeat {
     byte: u8,
 }
@@ -158,12 +154,10 @@ pub struct Repeat {
 /// io::repeat(0b101).read_exact(&mut buffer).unwrap();
 /// assert_eq!(buffer, [0b101, 0b101, 0b101]);
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn repeat(byte: u8) -> Repeat {
     Repeat { byte }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Read for Repeat {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -193,7 +187,6 @@ impl Read for Repeat {
     }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Repeat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("Repeat { .. }")
@@ -204,7 +197,6 @@ impl fmt::Debug for Repeat {
 ///
 /// This struct is generally created by calling [`sink`]. Please
 /// see the documentation of [`sink()`] for more details.
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Sink {
     _priv: (),
 }
@@ -225,12 +217,10 @@ pub struct Sink {
 /// let num_bytes = io::sink().write(&buffer).unwrap();
 /// assert_eq!(num_bytes, 5);
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn sink() -> Sink {
     Sink { _priv: () }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Write for Sink {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -254,7 +244,6 @@ impl Write for Sink {
     }
 }
 
-#[stable(feature = "write_mt", since = "1.48.0")]
 impl Write for &Sink {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -278,7 +267,6 @@ impl Write for &Sink {
     }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Sink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("Sink { .. }")
