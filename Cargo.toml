@@ -10,7 +10,7 @@ crate-type = ["staticlib"]
 
 [workspace]
 members = ["src/crt0", "src/crti", "src/crtn", "src/ld_so"]
-exclude = ["core_io", "ralloc"]
+exclude = ["tests"]
 
 [build-dependencies]
 cbindgen = "0.13.2"
@@ -18,7 +18,6 @@ cc = "1.0.25"
 
 [dependencies]
 cbitset = "0.1.0"
-core_io = { path = "core_io", features = ["collections"] }
 lazy_static = { version = "1.2.0", features = ["nightly", "spin_no_std"] }
 memoffset = "0.5.1"
 posix-regex = { path = "posix-regex", features = ["no_std"] }
