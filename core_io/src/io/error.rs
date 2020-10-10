@@ -1,13 +1,3 @@
-// Copyright 2015 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
-// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-
 #[cfg(feature="alloc")] use alloc::boxed::Box;
 #[cfg(not(feature="alloc"))] use ::FakeBox as Box;
 use core::fmt;
@@ -18,8 +8,7 @@ use core::result;
 #[cfg(not(feature="alloc"))] use ::ErrorString as String;
 use core::convert::From;
 
-/// A specialized [`Result`](../result/enum.Result.html) type for I/O
-/// operations.
+/// A specialized [`Result`] type for I/O operations.
 ///
 /// This type is broadly used across [`std::io`] for any operation which may
 /// produce an error.
@@ -30,12 +19,13 @@ use core::convert::From;
 /// While usual Rust style is to import types directly, aliases of [`Result`]
 /// often are not, to make it easier to distinguish between them. [`Result`] is
 /// generally assumed to be [`std::result::Result`][`Result`], and so users of this alias
-/// will generally use `io::Result` instead of shadowing the prelude's import
+/// will generally use `io::Result` instead of shadowing the [prelude]'s import
 /// of [`std::result::Result`][`Result`].
 ///
-/// [`std::io`]: ../io/index.html
-/// [`io::Error`]: ../io/struct.Error.html
-/// [`Result`]: ../result/enum.Result.html
+/// [`std::io`]: crate::io
+/// [`io::Error`]: Error
+/// [`Result`]: crate::result::Result
+/// [prelude]: crate::prelude
 ///
 /// # Examples
 ///
@@ -61,16 +51,15 @@ pub type Result<T> = result::Result<T, Error>;
 /// `Error` can be created with crafted error messages and a particular value of
 /// [`ErrorKind`].
 ///
-/// [`Read`]: ../io/trait.Read.html
-/// [`Write`]: ../io/trait.Write.html
-/// [`Seek`]: ../io/trait.Seek.html
-/// [`ErrorKind`]: enum.ErrorKind.html
+/// [`Read`]: crate::io::Read
+/// [`Write`]: crate::io::Write
+/// [`Seek`]: crate::io::Seek
 pub struct Error {
     repr: Repr,
 }
 
 impl fmt::Debug for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.repr, f)
     }
 }
@@ -97,7 +86,7 @@ struct Custom {
 ///
 /// It is used with the [`io::Error`] type.
 ///
-/// [`io::Error`]: struct.Error.html
+/// [`io::Error`]: Error
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[allow(deprecated)]
 pub enum ErrorKind {
@@ -137,7 +126,7 @@ pub enum ErrorKind {
     /// For example, a function that reads a file into a string will error with
     /// `InvalidData` if the file's contents are not valid UTF-8.
     ///
-    /// [`InvalidInput`]: #variant.InvalidInput
+    /// [`InvalidInput`]: ErrorKind::InvalidInput
     InvalidData,
     /// The I/O operation's timeout expired, causing it to be canceled.
     TimedOut,
@@ -148,8 +137,8 @@ pub enum ErrorKind {
     /// particular number of bytes but only a smaller number of bytes could be
     /// written.
     ///
-    /// [`write`]: ../../std/io/trait.Write.html#tymethod.write
-    /// [`Ok(0)`]: ../../std/io/type.Result.html
+    /// [`write`]: crate::io::Write::write
+    /// [`Ok(0)`]: Ok
     WriteZero,
     /// This operation was interrupted.
     ///
@@ -173,7 +162,7 @@ pub enum ErrorKind {
 }
 
 impl ErrorKind {
-    fn as_str(&self) -> &'static str {
+    pub(crate) fn as_str(&self) -> &'static str {
         match *self {
             ErrorKind::NotFound => "entity not found",
             ErrorKind::PermissionDenied => "permission denied",
@@ -216,9 +205,7 @@ impl From<ErrorKind> for Error {
     /// ```
     #[inline]
     fn from(kind: ErrorKind) -> Error {
-        Error {
-            repr: Repr::Simple(kind)
-        }
+        Error { repr: Repr::Simple(kind) }
     }
 }
 
@@ -228,7 +215,7 @@ impl Error {
     ///
     /// This function is used to generically create I/O errors which do not
     /// originate from the OS itself. The `error` argument is an arbitrary
-    /// payload which will be contained in this `Error`.
+    /// payload which will be contained in this [`Error`].
     ///
     /// # Examples
     ///
@@ -256,7 +243,7 @@ impl Error {
         }
     }
 
-    /// Creates a new instance of an `Error` from a particular OS error code.
+    /// Creates a new instance of an [`Error`] from a particular OS error code.
     ///
     /// # Examples
     ///
@@ -287,9 +274,12 @@ impl Error {
 
     /// Returns the OS error that this error represents (if any).
     ///
-    /// If this `Error` was constructed via `last_os_error` or
-    /// `from_raw_os_error`, then this function will return `Some`, otherwise
-    /// it will return `None`.
+    /// If this [`Error`] was constructed via [`last_os_error`] or
+    /// [`from_raw_os_error`], then this function will return [`Some`], otherwise
+    /// it will return [`None`].
+    ///
+    /// [`last_os_error`]: Error::last_os_error
+    /// [`from_raw_os_error`]: Error::from_raw_os_error
     ///
     /// # Examples
     ///
@@ -321,8 +311,10 @@ impl Error {
 
     /// Returns a reference to the inner error wrapped by this error (if any).
     ///
-    /// If this `Error` was constructed via `new` then this function will
-    /// return `Some`, otherwise it will return `None`.
+    /// If this [`Error`] was constructed via [`new`] then this function will
+    /// return [`Some`], otherwise it will return [`None`].
+    ///
+    /// [`new`]: Error::new
     ///
     /// # Examples
     ///
@@ -355,8 +347,10 @@ impl Error {
     /// Returns a mutable reference to the inner error wrapped by this error
     /// (if any).
     ///
-    /// If this `Error` was constructed via `new` then this function will
-    /// return `Some`, otherwise it will return `None`.
+    /// If this [`Error`] was constructed via [`new`] then this function will
+    /// return [`Some`], otherwise it will return [`None`].
+    ///
+    /// [`new`]: Error::new
     ///
     /// # Examples
     ///
@@ -382,12 +376,10 @@ impl Error {
     ///     }
     /// }
     ///
-    /// impl error::Error for MyError {
-    ///     fn description(&self) -> &str { &self.v }
-    /// }
+    /// impl error::Error for MyError {}
     ///
     /// impl Display for MyError {
-    ///     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    ///     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     ///         write!(f, "MyError: {}", &self.v)
     ///     }
     /// }
@@ -424,8 +416,10 @@ impl Error {
 
     /// Consumes the `Error`, returning its inner error (if any).
     ///
-    /// If this `Error` was constructed via `new` then this function will
-    /// return `Some`, otherwise it will return `None`.
+    /// If this [`Error`] was constructed via [`new`] then this function will
+    /// return [`Some`], otherwise it will return [`None`].
+    ///
+    /// [`new`]: Error::new
     ///
     /// # Examples
     ///
@@ -451,11 +445,11 @@ impl Error {
         match self.repr {
             Repr::Os(..) => None,
             Repr::Simple(..) => None,
-            Repr::Custom(c) => Some(c.error)
+            Repr::Custom(c) => Some(c.error),
         }
     }
 
-    /// Returns the corresponding `ErrorKind` for this error.
+    /// Returns the corresponding [`ErrorKind`] for this error.
     ///
     /// # Examples
     ///
@@ -467,9 +461,9 @@ impl Error {
     /// }
     ///
     /// fn main() {
-    ///     // Will print "No inner error".
+    ///     // Will print "Other".
     ///     print_error(Error::last_os_error());
-    ///     // Will print "Inner error: ...".
+    ///     // Will print "AddrInUse".
     ///     print_error(Error::new(ErrorKind::AddrInUse, "oh no!"));
     /// }
     /// ```
@@ -483,7 +477,7 @@ impl Error {
 }
 
 impl fmt::Debug for Repr {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Repr::Os(code) =>
                 fmt.debug_struct("Os")
@@ -495,7 +489,7 @@ impl fmt::Debug for Repr {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.repr {
             Repr::Os(code) => {
                 write!(fmt, "os error {}", code)
@@ -507,69 +501,6 @@ impl fmt::Display for Error {
 }
 
 fn _assert_error_is_sync_send() {
-    fn _is_sync_send<T: Sync+Send>() {}
+    fn _is_sync_send<T: Sync + Send>() {}
     _is_sync_send::<Error>();
-}
-
-#[cfg(test)]
-mod test {
-    use super::{Error, ErrorKind, Repr, Custom};
-    use error;
-    use fmt;
-    use sys::os::error_string;
-    use sys::decode_error_kind;
-
-    #[test]
-    fn test_debug_error() {
-        let code = 6;
-        let msg = error_string(code);
-        let kind = decode_error_kind(code);
-        let err = Error {
-            repr: Repr::Custom(box Custom {
-                kind: ErrorKind::InvalidInput,
-                error: box Error {
-                    repr: super::Repr::Os(code)
-                },
-            })
-        };
-        let expected = format!(
-            "Custom {{ \
-                kind: InvalidInput, \
-                error: Os {{ \
-                    code: {:?}, \
-                    kind: {:?}, \
-                    message: {:?} \
-                }} \
-            }}",
-            code, kind, msg
-        );
-        assert_eq!(format!("{:?}", err), expected);
-    }
-
-    #[test]
-    fn test_downcasting() {
-        #[derive(Debug)]
-        struct TestError;
-
-        impl fmt::Display for TestError {
-            fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
-                Ok(())
-            }
-        }
-
-        impl error::Error for TestError {
-            fn description(&self) -> &str {
-                "asdf"
-            }
-        }
-
-        // we have to call all of these UFCS style right now since method
-        // resolution won't implicitly drop the Send+Sync bounds
-        let mut err = Error::new(ErrorKind::Other, TestError);
-        assert!(err.get_ref().unwrap().is::<TestError>());
-        assert_eq!("asdf", err.get_ref().unwrap().description());
-        assert!(err.get_mut().unwrap().is::<TestError>());
-        let extracted = err.into_inner().unwrap();
-        extracted.downcast::<TestError>().unwrap();
-    }
 }
