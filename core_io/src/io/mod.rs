@@ -254,19 +254,21 @@ use core::fmt;
 use core::str;
 use core::slice::memchr;
 use core::ptr;
+use core::slice;
+use core::ops::{ Deref, DerefMut };
 
 pub use self::buffered::{BufReader, BufWriter, LineWriter};
-pub use self::buffered::IntoInnerError;
 pub use self::cursor::Cursor;
-pub use self::error::{Result, Error, ErrorKind};
-pub use self::util::{copy, sink, Sink, empty, Empty, repeat, Repeat};
+pub use self::error::{Error, ErrorKind, Result};
+pub use self::util::{copy, empty, repeat, sink, Empty, Repeat, Sink};
 
-pub mod prelude;
 mod buffered;
 mod cursor;
 mod error;
 mod impls;
+pub mod prelude;
 mod util;
+mod sys_io;
 
 const DEFAULT_BUF_SIZE: usize = 8 * 1024;
 
@@ -546,7 +548,6 @@ pub trait Read {
     ///
     /// The default implementation calls `read` with either the first nonempty
     /// buffer provided, or an empty one if none exists.
-    #[stable(feature = "iovec", since = "1.36.0")]
     fn read_vectored(&mut self, bufs: &mut [IoSliceMut<'_>]) -> Result<usize> {
         default_read_vectored(|b| self.read(b), bufs)
     }
@@ -559,7 +560,6 @@ pub trait Read {
     /// and coalesce writes into a single buffer for higher performance.
     ///
     /// The default implementation returns `false`.
-    #[unstable(feature = "can_vector", issue = "69941")]
     fn is_read_vectored(&self) -> bool {
         false
     }
@@ -916,17 +916,13 @@ pub trait Read {
 /// It is semantically a wrapper around an `&mut [u8]`, but is guaranteed to be
 /// ABI compatible with the `iovec` type on Unix platforms and `WSABUF` on
 /// Windows.
-#[stable(feature = "iovec", since = "1.36.0")]
 #[repr(transparent)]
-pub struct IoSliceMut<'a>(sys::io::IoSliceMut<'a>);
+pub struct IoSliceMut<'a>(sys_io::IoSliceMut<'a>);
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
 unsafe impl<'a> Send for IoSliceMut<'a> {}
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
 unsafe impl<'a> Sync for IoSliceMut<'a> {}
 
-#[stable(feature = "iovec", since = "1.36.0")]
 impl<'a> fmt::Debug for IoSliceMut<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(self.0.as_slice(), fmt)
@@ -939,10 +935,9 @@ impl<'a> IoSliceMut<'a> {
     /// # Panics
     ///
     /// Panics on Windows if the slice is larger than 4GB.
-    #[stable(feature = "iovec", since = "1.36.0")]
     #[inline]
     pub fn new(buf: &'a mut [u8]) -> IoSliceMut<'a> {
-        IoSliceMut(sys::io::IoSliceMut::new(buf))
+        IoSliceMut(sys_io::IoSliceMut::new(buf))
     }
 
     /// Advance the internal cursor of the slice.
@@ -977,7 +972,6 @@ impl<'a> IoSliceMut<'a> {
     /// assert_eq!(bufs[0].deref(), [2; 14].as_ref());
     /// assert_eq!(bufs[1].deref(), [3; 8].as_ref());
     /// ```
-    #[unstable(feature = "io_slice_advance", issue = "62726")]
     #[inline]
     pub fn advance<'b>(bufs: &'b mut [IoSliceMut<'a>], n: usize) -> &'b mut [IoSliceMut<'a>] {
         // Number of buffers to remove.
@@ -1001,7 +995,6 @@ impl<'a> IoSliceMut<'a> {
     }
 }
 
-#[stable(feature = "iovec", since = "1.36.0")]
 impl<'a> Deref for IoSliceMut<'a> {
     type Target = [u8];
 
@@ -1011,7 +1004,6 @@ impl<'a> Deref for IoSliceMut<'a> {
     }
 }
 
-#[stable(feature = "iovec", since = "1.36.0")]
 impl<'a> DerefMut for IoSliceMut<'a> {
     #[inline]
     fn deref_mut(&mut self) -> &mut [u8] {
@@ -1024,18 +1016,14 @@ impl<'a> DerefMut for IoSliceMut<'a> {
 /// It is semantically a wrapper around an `&[u8]`, but is guaranteed to be
 /// ABI compatible with the `iovec` type on Unix platforms and `WSABUF` on
 /// Windows.
-#[stable(feature = "iovec", since = "1.36.0")]
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct IoSlice<'a>(sys::io::IoSlice<'a>);
+pub struct IoSlice<'a>(sys_io::IoSlice<'a>);
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
 unsafe impl<'a> Send for IoSlice<'a> {}
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
 unsafe impl<'a> Sync for IoSlice<'a> {}
 
-#[stable(feature = "iovec", since = "1.36.0")]
 impl<'a> fmt::Debug for IoSlice<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(self.0.as_slice(), fmt)
@@ -1048,10 +1036,9 @@ impl<'a> IoSlice<'a> {
     /// # Panics
     ///
     /// Panics on Windows if the slice is larger than 4GB.
-    #[stable(feature = "iovec", since = "1.36.0")]
     #[inline]
     pub fn new(buf: &'a [u8]) -> IoSlice<'a> {
-        IoSlice(sys::io::IoSlice::new(buf))
+        IoSlice(sys_io::IoSlice::new(buf))
     }
 
     /// Advance the internal cursor of the slice.
@@ -1085,7 +1072,6 @@ impl<'a> IoSlice<'a> {
     /// bufs = IoSlice::advance(bufs, 10);
     /// assert_eq!(bufs[0].deref(), [2; 14].as_ref());
     /// assert_eq!(bufs[1].deref(), [3; 8].as_ref());
-    #[unstable(feature = "io_slice_advance", issue = "62726")]
     #[inline]
     pub fn advance<'b>(bufs: &'b mut [IoSlice<'a>], n: usize) -> &'b mut [IoSlice<'a>] {
         // Number of buffers to remove.
@@ -1109,7 +1095,6 @@ impl<'a> IoSlice<'a> {
     }
 }
 
-#[stable(feature = "iovec", since = "1.36.0")]
 impl<'a> Deref for IoSlice<'a> {
     type Target = [u8];
 
@@ -1261,7 +1246,6 @@ pub trait Write {
     /// buffer provided, or an empty one if none exists.
     ///
     /// [`write`]: Write::write
-    #[stable(feature = "iovec", since = "1.36.0")]
     fn write_vectored(&mut self, bufs: &[IoSlice<'_>]) -> Result<usize> {
         default_write_vectored(|b| self.write(b), bufs)
     }
@@ -1276,7 +1260,6 @@ pub trait Write {
     /// The default implementation returns `false`.
     ///
     /// [`write_vectored`]: Write::write_vectored
-    #[unstable(feature = "can_vector", issue = "69941")]
     fn is_write_vectored(&self) -> bool {
         false
     }
@@ -1398,7 +1381,6 @@ pub trait Write {
     /// assert_eq!(writer, &[1, 2, 3, 4, 5, 6]);
     /// # Ok(()) }
     /// ```
-    #[unstable(feature = "write_all_vectored", issue = "70436")]
     fn write_all_vectored(&mut self, mut bufs: &mut [IoSlice<'_>]) -> Result<()> {
         // Guarantee that bufs is empty if it contains no data,
         // to avoid calling write_vectored if there is no data to be written.
@@ -1589,7 +1571,6 @@ pub trait Seek {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "seek_convenience", issue = "59359")]
     fn stream_len(&mut self) -> Result<u64> {
         let old_pos = self.stream_position()?;
         let len = self.seek(SeekFrom::End(0))?;
@@ -1627,7 +1608,6 @@ pub trait Seek {
     ///     Ok(())
     /// }
     /// ```
-    #[unstable(feature = "seek_convenience", issue = "59359")]
     fn stream_position(&mut self) -> Result<u64> {
         self.seek(SeekFrom::Current(0))
     }

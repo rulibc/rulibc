@@ -1,11 +1,8 @@
-// except according to those terms.
-
 use io::prelude::*;
 
-use alloc::boxed::Box;
 use core::convert::TryInto;
 use core::cmp;
-use io::{self, Initializer, SeekFrom, Error, ErrorKind};
+use io::{self, Initializer, SeekFrom, Error, ErrorKind, IoSlice, IoSliceMut};
 
 /// A `Cursor` wraps an in-memory buffer and provides it with a
 /// [`Seek`] implementation.
@@ -374,7 +371,6 @@ impl Write for Cursor<&mut [u8]> {
     }
 }
 
-#[stable(feature = "cursor_mut_vec", since = "1.25.0")]
 impl Write for Cursor<&mut Vec<u8>> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         vec_write(&mut self.pos, self.inner, buf)
@@ -395,7 +391,6 @@ impl Write for Cursor<&mut Vec<u8>> {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Write for Cursor<Vec<u8>> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         vec_write(&mut self.pos, &mut self.inner, buf)
@@ -416,7 +411,6 @@ impl Write for Cursor<Vec<u8>> {
     }
 }
 
-#[stable(feature = "cursor_box_slice", since = "1.5.0")]
 impl Write for Cursor<Box<[u8]>> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {

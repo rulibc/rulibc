@@ -1,8 +1,6 @@
-// except according to those terms.
-
 use alloc::boxed::Box;
 use core::cmp;
-use io::{self, SeekFrom, Read, Initializer, Write, Seek, Error, ErrorKind};
+use io::{self, SeekFrom, Read, Initializer, Write, Seek, Error, ErrorKind, IoSlice, IoSliceMut};
 use io::BufRead;
 use core::fmt;
 use core::mem;

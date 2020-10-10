@@ -1,8 +1,8 @@
 #![allow(missing_copy_implementations)]
 
 use core::fmt;
-use io::{self, Read, Initializer, Write, ErrorKind};
-use core::mem;
+use io::{self, Read, Initializer, Write, ErrorKind, IoSlice, IoSliceMut};
+use core::mem::MaybeUninit;
 use io::BufRead;
 
 /// Copies the entire contents of a reader into a writer.
@@ -57,19 +57,24 @@ where
     //   - Only the standard library gets to soundly "ignore" this,
     //     based on its privileged knowledge of unstable rustc
     //     internals;
+    let buf_u8: &mut [u8];
     unsafe {
-        reader.initializer().initialize(buf.assume_init_mut());
+        buf_u8 = core::slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, super::DEFAULT_BUF_SIZE);
+        reader.initializer().initialize(buf_u8);
     }
 
     let mut written = 0;
     loop {
-        let len = match reader.read(unsafe { buf.assume_init_mut() }) {
+        let len = match reader.read(buf_u8) {
             Ok(0) => return Ok(written),
             Ok(len) => len,
             Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
             Err(e) => return Err(e),
         };
-        writer.write_all(unsafe { &buf.assume_init_ref()[..len] })?;
+        unsafe {
+            let buf_u8_to_write: &mut [u8] = core::slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, len);
+            writer.write_all(buf_u8_to_write)?;
+        }
         written += len as u64;
     }
 }
@@ -239,7 +244,6 @@ impl Write for Sink {
     }
 }
 
-#[stable(feature = "write_mt", since = "1.48.0")]
 impl Write for &Sink {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -263,7 +267,6 @@ impl Write for &Sink {
     }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Sink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("Sink { .. }")

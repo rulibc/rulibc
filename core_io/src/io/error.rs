@@ -229,7 +229,7 @@ impl Error {
     /// // errors can also be created from other errors
     /// let custom_error2 = Error::new(ErrorKind::Interrupted, custom_error);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
+
     pub fn new<E>(kind: ErrorKind, error: E) -> Error
     where
         E: Into<String>,
@@ -405,6 +405,7 @@ impl Error {
     ///     print_error(&change_error(Error::new(ErrorKind::Other, MyError::new())));
     /// }
     /// ```
+
     pub fn get_mut(&mut self) -> Option<&mut String> {
         match self.repr {
             Repr::Os(..) => None,
@@ -440,6 +441,7 @@ impl Error {
     ///     print_error(Error::new(ErrorKind::Other, "oh no!"));
     /// }
     /// ```
+
     pub fn into_inner(self) -> Option<String> {
         match self.repr {
             Repr::Os(..) => None,

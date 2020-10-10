@@ -5,16 +5,8 @@ use io::prelude::*;
 
 use core::cmp;
 use core::fmt;
-use io::{self, Initializer, DEFAULT_BUF_SIZE, Error, ErrorKind, SeekFrom};
+use io::{self, Initializer, DEFAULT_BUF_SIZE, Error, ErrorKind, SeekFrom, IoSlice, IoSliceMut};
 use io::memchr;
-
-use crate::cmp;
-use crate::error;
-use crate::fmt;
-use crate::io::{
-    self, Error, ErrorKind, Initializer, IoSlice, IoSliceMut, SeekFrom, DEFAULT_BUF_SIZE,
-};
-use crate::memchr;
 
 /// The `BufReader<R>` struct adds buffering to any reader.
 ///
@@ -198,7 +190,6 @@ impl<R> BufReader<R> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "buffered_io_capacity", since = "1.46.0")]
     pub fn capacity(&self) -> usize {
         self.buf.len()
     }
@@ -678,7 +669,6 @@ impl<W: Write> BufWriter<W> {
     /// // See how many bytes are currently buffered
     /// let bytes_buffered = buf_writer.buffer().len();
     /// ```
-    #[stable(feature = "bufreader_buffer", since = "1.37.0")]
     pub fn buffer(&self) -> &[u8] {
         &self.buf
     }
@@ -698,7 +688,6 @@ impl<W: Write> BufWriter<W> {
     /// // Calculate how many bytes can be written without flushing
     /// let without_flush = capacity - buf_writer.buffer().len();
     /// ```
-    #[stable(feature = "buffered_io_capacity", since = "1.46.0")]
     pub fn capacity(&self) -> usize {
         self.buf.capacity()
     }
@@ -1386,7 +1375,6 @@ impl<W: Write> Write for LineWriter<W> {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<W: Write> fmt::Debug for LineWriter<W>
 where
     W: fmt::Debug,
