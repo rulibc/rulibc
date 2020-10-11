@@ -545,7 +545,9 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 #define ENOMEM 12
 #define EINVAL 22
 
-extern __thread int errno;
+int *__errno_location(void);
+#define errno (*__errno_location())
+
 #if defined(__linux__)
 #define O_RDWR 2
 #define PROT_READ 1
@@ -592,9 +594,152 @@ void *memset(void *s, int c, size_t n);
 #endif /* _WIN32_WCE */
 #endif  /* WIN32 */
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <tchar.h>
+
+#if defined(_WIN64)
+    typedef __int64 INT_PTR, *PINT_PTR;
+    typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
+
+    typedef __int64 LONG_PTR, *PLONG_PTR;
+    typedef unsigned __int64 ULONG_PTR, *PULONG_PTR;
+
+    #define __int3264   __int64
+
+#else
+    typedef int INT_PTR, *PINT_PTR;
+    typedef unsigned int UINT_PTR, *PUINT_PTR;
+
+    typedef long LONG_PTR, *PLONG_PTR;
+    typedef unsigned long ULONG_PTR, *PULONG_PTR;
+
+    #define __int3264   __int32
+
+#endif
+typedef unsigned long       DWORD;
+typedef int                 BOOL;
+typedef unsigned char       BYTE;
+typedef unsigned short      WORD;
+typedef long LONG;
+typedef void VOID;
+typedef void * PVOID;
+typedef void             *LPVOID;
+typedef ULONG_PTR SIZE_T, *PSIZE_T;
+typedef const void       *LPCVOID;
+typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
+
+#ifndef FALSE
+#define FALSE               0
+#endif
+
+#ifndef TRUE
+#define TRUE                1
+#endif
+
+
+#define WINBASEAPI  __declspec(dllimport)
+#define WINAPI __stdcall
+
+#define MEM_COMMIT                      0x00001000
+#define MEM_RESERVE                     0x00002000
+#define MEM_REPLACE_PLACEHOLDER         0x00004000
+#define MEM_RESERVE_PLACEHOLDER         0x00040000
+#define MEM_RESET                       0x00080000
+#define MEM_TOP_DOWN                    0x00100000
+#define MEM_WRITE_WATCH                 0x00200000
+#define MEM_PHYSICAL                    0x00400000
+#define MEM_ROTATE                      0x00800000
+#define MEM_DIFFERENT_IMAGE_BASE_OK     0x00800000  
+#define MEM_RESET_UNDO                  0x01000000  
+#define MEM_LARGE_PAGES                 0x20000000  
+#define MEM_4MB_PAGES                   0x80000000
+#define MEM_64K_PAGES                   (MEM_LARGE_PAGES | MEM_PHYSICAL)  
+#define MEM_UNMAP_WITH_TRANSIENT_BOOST  0x00000001
+#define MEM_COALESCE_PLACEHOLDERS       0x00000001  
+#define MEM_PRESERVE_PLACEHOLDER        0x00000002  
+#define MEM_DECOMMIT                    0x00004000
+#define MEM_RELEASE                     0x00008000
+#define MEM_FREE                        0x00010000
+#define PAGE_READWRITE          0x04
+
+typedef struct _MEMORY_BASIC_INFORMATION {
+    PVOID BaseAddress;
+    PVOID AllocationBase;
+    DWORD AllocationProtect;
+#if defined (_WIN64)
+    WORD   PartitionId;
+#endif
+    SIZE_T RegionSize;
+    DWORD State;
+    DWORD Protect;
+    DWORD Type;
+} MEMORY_BASIC_INFORMATION, *PMEMORY_BASIC_INFORMATION;
+
+
+typedef struct _SYSTEM_INFO {
+    union {
+        DWORD dwOemId;          // Obsolete field...do not use
+        struct {
+            WORD wProcessorArchitecture;
+            WORD wReserved;
+        } DUMMYSTRUCTNAME;
+    } DUMMYUNIONNAME;
+    DWORD dwPageSize;
+    LPVOID lpMinimumApplicationAddress;
+    LPVOID lpMaximumApplicationAddress;
+    DWORD_PTR dwActiveProcessorMask;
+    DWORD dwNumberOfProcessors;
+    DWORD dwProcessorType;
+    DWORD dwAllocationGranularity;
+    WORD wProcessorLevel;
+    WORD wProcessorRevision;
+} SYSTEM_INFO, *LPSYSTEM_INFO;
+
+WINBASEAPI
+DWORD
+WINAPI
+SleepEx(
+    DWORD dwMilliseconds,
+    BOOL bAlertable
+    );
+
+WINBASEAPI
+LPVOID
+WINAPI
+VirtualAlloc(
+    LPVOID lpAddress,
+    SIZE_T dwSize,
+    DWORD flAllocationType,
+    DWORD flProtect
+    );
+WINBASEAPI
+SIZE_T
+WINAPI
+VirtualQuery(
+    LPCVOID lpAddress,
+    PMEMORY_BASIC_INFORMATION lpBuffer,
+    SIZE_T dwLength
+    );
+WINBASEAPI
+BOOL
+WINAPI
+VirtualFree(
+    LPVOID lpAddress,
+    SIZE_T dwSize,
+    DWORD dwFreeType
+    );
+
+WINBASEAPI
+VOID
+WINAPI
+GetSystemInfo(
+     LPSYSTEM_INFO lpSystemInfo
+    );
+WINBASEAPI
+DWORD
+WINAPI
+GetTickCount(
+    VOID
+    );
+
 #define HAVE_MMAP 1
 #define HAVE_MORECORE 0
 #define LACKS_UNISTD_H
@@ -1535,7 +1680,7 @@ DLMALLOC_EXPORT int mspace_mallopt(int, int);
 #ifndef LACKS_UNISTD_H
 #include <unistd.h>     /* for sbrk, sysconf */
 #else /* LACKS_UNISTD_H */
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__)
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(WIN32)
 extern void*     sbrk(ptrdiff_t);
 #endif /* FreeBSD etc */
 #endif /* LACKS_UNISTD_H */

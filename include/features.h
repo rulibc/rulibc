@@ -6,6 +6,8 @@
 #ifndef _FEATURES_H
 #define _FEATURES_H
 
+#include <stddef.h>
+
 #if __STDC_VERSION__ >= 199901L
 #define __restrict restrict
 #elif !defined(__GNUC__)
