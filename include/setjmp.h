@@ -1,6 +1,20 @@
 #ifndef _SETJMP_H
 #define _SETJMP_H
 
+#include <stddef.h>
+
+#if defined(_WIN32)
+
+#if defined(__i386__) || defined(_X86_) || defined(_M_IX86)
+typedef unsigned long long jmp_buf[8];
+#endif
+
+#if defined(__x86_64__) || defined(_AMD64_) || defined(_M_X64)
+typedef unsigned long jmp_buf[8];
+#endif
+
+#else
+
 #ifdef __aarch64__
 typedef unsigned long jmp_buf[22];
 #endif
@@ -59,6 +73,8 @@ typedef unsigned long long jmp_buf[8];
 
 #ifdef __x86_64__
 typedef unsigned long jmp_buf[8];
+#endif
+
 #endif
 
 #ifdef __cplusplus

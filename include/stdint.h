@@ -28,6 +28,14 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #ifndef _STDINT_H
 #define _STDINT_H
 
+#include <stddef.h>
+
+#if defined(_MSC_VER)
+
+#include "stdint_rulibc_msvc.h"
+
+#else
+
 /* 7.8.1.1 Exact-width integer types */
 
 #ifdef __INT8_TYPE__
@@ -363,5 +371,7 @@ typedef __UINTMAX_TYPE__ uintmax_t;
 #endif
 
 typedef long sig_atomic_t;
+
+#endif
 
 #endif /* _GCC_STDINT_H */
