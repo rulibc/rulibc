@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <openlibm_math.h>
 
 // Included to fix mesa issues

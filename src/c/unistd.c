@@ -2,6 +2,9 @@
 #include <stddef.h>
 
 // TODO: Can be implemented in rust when cbindgen supports "..." syntax
+#if defined(_MSC_VER)
+void* __cdecl _alloca( size_t _Size);
+#endif
 
 int execv(const char *path, char *const *argv);
 
@@ -14,7 +17,11 @@ int execl(const char *path, const char* argv0, ...)
 	va_end(ap);
 	{
 		int i;
+#if defined(_MSC_VER)
+		char **argv = _alloca( (argc+1) * sizeof(char*));
+#else
 		char *argv[argc+1];
+#endif
 		va_start(ap, argv0);
 		argv[0] = (char *)argv0;
 		for (i = 1; i < argc; i++) {
@@ -37,7 +44,12 @@ int execle(const char *path, const char* argv0, ...)
 	va_end(ap);
 	{
 		int i;
+#if defined(_MSC_VER)
+		char **argv = _alloca( (argc+1) * sizeof(char*));
+#else
 		char *argv[argc+1];
+#endif
+
 		char **envp;
 		va_start(ap, argv0);
 		argv[0] = (char *)argv0;
@@ -61,7 +73,12 @@ int execlp(const char *file, const char* argv0, ...)
 	va_end(ap);
 	{
 		int i;
+#if defined(_MSC_VER)
+		char **argv = _alloca( (argc+1) * sizeof(char*));
+#else
 		char *argv[argc+1];
+#endif
+
 		va_start(ap, argv0);
 		argv[0] = (char *)argv0;
 		for (i = 1; i < argc; i++) {
