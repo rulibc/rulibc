@@ -29,10 +29,6 @@ version = "0.0.21"
 default-features = false
 features = ["elf32", "elf64", "endian_fd"]
 
-[dependencies.ralloc]
-path = "ralloc"
-default-features = false
-optional = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sc = "0.2.3"
