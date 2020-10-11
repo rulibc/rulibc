@@ -20,7 +20,7 @@ next:   pop rsi
         # Call ld_so_start(stack, entry)
         mov rdi, rbp
         sub rsi, 5
-        call relibc_ld_so_start
+        call rulibc_ld_so_start
 
         # Restore original stack, clear registers, and jump to new start function
         mov rsp, rbp
@@ -66,7 +66,7 @@ pub unsafe extern "C" fn main(_argc: isize, _argv: *const *const i8) -> usize {
 #[no_mangle]
 pub unsafe extern "C" fn rust_begin_unwind(pi: &::core::panic::PanicInfo) -> ! {
     extern "C" {
-        fn relibc_panic(pi: &::core::panic::PanicInfo) -> !;
+        fn rulibc_panic(pi: &::core::panic::PanicInfo) -> !;
     }
-    relibc_panic(pi)
+    rulibc_panic(pi)
 }

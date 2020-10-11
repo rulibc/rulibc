@@ -66,11 +66,11 @@ use crate::platform::{Allocator, Pal, Sys, NEWALLOCATOR};
 static ALLOCATOR: Allocator = NEWALLOCATOR;
 
 #[no_mangle]
-pub extern "C" fn relibc_panic(pi: &::core::panic::PanicInfo) -> ! {
+pub extern "C" fn rulibc_panic(pi: &::core::panic::PanicInfo) -> ! {
     use core::fmt::Write;
 
     let mut w = platform::FileWriter(2);
-    let _ = w.write_fmt(format_args!("RELIBC PANIC: {}\n", pi));
+    let _ = w.write_fmt(format_args!("RULIBC PANIC: {}\n", pi));
 
     Sys::exit(1);
 }
@@ -80,7 +80,7 @@ pub extern "C" fn relibc_panic(pi: &::core::panic::PanicInfo) -> ! {
 #[linkage = "weak"]
 #[no_mangle]
 pub extern "C" fn rust_begin_unwind(pi: &::core::panic::PanicInfo) -> ! {
-    relibc_panic(pi)
+    rulibc_panic(pi)
 }
 
 #[cfg(not(test))]
@@ -98,7 +98,7 @@ pub extern "C" fn rust_oom(layout: ::core::alloc::Layout) -> ! {
 
     let mut w = platform::FileWriter(2);
     let _ = w.write_fmt(format_args!(
-        "RELIBC OOM: {} bytes aligned to {} bytes\n",
+        "RULIBC OOM: {} bytes aligned to {} bytes\n",
         layout.size(),
         layout.align()
     ));

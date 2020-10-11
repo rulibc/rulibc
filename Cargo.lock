@@ -292,7 +292,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "relibc"
+name = "remove_dir_all"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "winapi 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "rulibc"
 version = "0.1.0"
 dependencies = [
  "cbindgen 0.13.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -308,14 +316,6 @@ dependencies = [
  "redox_syscall 0.2.0 (git+https://gitlab.redox-os.org/redox-os/syscall?rev=4115e0f43547449ce56f7d7749732813e9505955)",
  "sc 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "spin 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "remove_dir_all"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "winapi 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

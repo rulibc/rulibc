@@ -112,7 +112,7 @@ test: sysroot
 
 # Debug targets
 
-$(BUILD)/debug/libc.a: $(BUILD)/debug/librelibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
+$(BUILD)/debug/libc.a: $(BUILD)/debug/librulibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
 	echo "create $@" > "$@.mri"
 	for lib in $^; do\
 		echo "addlib $$lib" >> "$@.mri"; \
@@ -121,10 +121,10 @@ $(BUILD)/debug/libc.a: $(BUILD)/debug/librelibc.a $(BUILD)/pthreads-emb/libpthre
 	echo "end" >> "$@.mri"
 	$(AR) -M < "$@.mri"
 
-$(BUILD)/debug/libc.so: $(BUILD)/debug/librelibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
+$(BUILD)/debug/libc.so: $(BUILD)/debug/librulibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
 	$(CC) -nostdlib -shared -Wl,--allow-multiple-definition -Wl,--whole-archive $^ -Wl,--no-whole-archive -Wl,-soname,libc.so.6 -o $@
 
-$(BUILD)/debug/librelibc.a: $(SRC)
+$(BUILD)/debug/librulibc.a: $(SRC)
 	CARGO_INCREMENTAL=0 $(CARGO) rustc $(CARGOFLAGS) -- --emit link=$@ $(RUSTCFLAGS)
 	# FIXME: Remove the following line. It's only required since xargo automatically links with compiler_builtins, which conflicts with the compiler_builtins that rustc always links with.
 	$(OBJCOPY) $@ $(WEAKEN_SYMBOLS)
@@ -151,7 +151,7 @@ $(BUILD)/debug/ld_so: $(BUILD)/debug/ld_so.o $(BUILD)/debug/crti.o $(BUILD)/debu
 
 # Release targets
 
-$(BUILD)/release/libc.a: $(BUILD)/release/librelibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
+$(BUILD)/release/libc.a: $(BUILD)/release/librulibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
 	echo "create $@" > "$@.mri"
 	for lib in $^; do\
 		echo "addlib $$lib" >> "$@.mri"; \
@@ -160,10 +160,10 @@ $(BUILD)/release/libc.a: $(BUILD)/release/librelibc.a $(BUILD)/pthreads-emb/libp
 	echo "end" >> "$@.mri"
 	$(AR) -M < "$@.mri"
 
-$(BUILD)/release/libc.so: $(BUILD)/release/librelibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
+$(BUILD)/release/libc.so: $(BUILD)/release/librulibc.a $(BUILD)/pthreads-emb/libpthread.a $(BUILD)/openlibm/libopenlibm.a
 	$(CC) -nostdlib -shared -Wl,--allow-multiple-definition -Wl,--whole-archive $^ -Wl,--no-whole-archive -Wl,-soname,libc.so.6 -o $@
 
-$(BUILD)/release/librelibc.a: $(SRC)
+$(BUILD)/release/librulibc.a: $(SRC)
 	CARGO_INCREMENTAL=0 $(CARGO) rustc --release $(CARGOFLAGS) -- --emit link=$@ $(RUSTCFLAGS)
 	$(OBJCOPY) $@ $(WEAKEN_SYMBOLS)
 	touch $@
@@ -197,7 +197,7 @@ $(BUILD)/openlibm: openlibm
 	ln -s -r $@.partial $@
 	touch $@
 
-$(BUILD)/openlibm/libopenlibm.a: $(BUILD)/openlibm $(BUILD)/release/librelibc.a
+$(BUILD)/openlibm/libopenlibm.a: $(BUILD)/openlibm $(BUILD)/release/librulibc.a
 	$(MAKE) CC=$(CC) CPPFLAGS="-fno-stack-protector -I $(shell pwd)/include -I $(shell pwd)/target/include" -C $< libopenlibm.a
 
 $(BUILD)/pthreads-emb: pthreads-emb
@@ -208,5 +208,5 @@ $(BUILD)/pthreads-emb: pthreads-emb
 	ln -s -r $@.partial $@
 	touch $@
 
-$(BUILD)/pthreads-emb/libpthread.a: $(BUILD)/pthreads-emb $(BUILD)/release/librelibc.a
+$(BUILD)/pthreads-emb/libpthread.a: $(BUILD)/pthreads-emb $(BUILD)/release/librulibc.a
 	$(MAKE) CC=$(CC) CFLAGS="-fno-stack-protector -I $(shell pwd)/include -I $(shell pwd)/target/include" -C $< libpthread.a

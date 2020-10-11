@@ -208,8 +208,8 @@ STATIC_FLAGS=\
 	../sysroot/lib/libc.a \
 	-static
 
-NATIVE_RELIBC?=0
-ifeq ($(NATIVE_RELIBC),0)
+NATIVE_RULIBC?=0
+ifeq ($(NATIVE_RULIBC),0)
 FLAGS+=\
 	-nostdinc \
 	-nostdlib \
