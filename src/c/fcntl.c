@@ -1,3 +1,5 @@
+#if !defined(_WIN32)
+
 #include <stdarg.h>
 #include <sys/types_internal.h>
 
@@ -24,3 +26,5 @@ int fcntl(int fildes, int cmd, ...) {
     va_end(ap);
     return sys_fcntl(fildes, cmd, args);
 }
+
+#endif

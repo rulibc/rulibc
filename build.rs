@@ -76,3 +76,8 @@ fn main() {
 
     println!("cargo:rustc-link-lib=static=relibc_c");
 }
+
+//
+// cargo b -Zbuild-std=core --target x86_64-pc-windows-msvc
+// cargo b
+// cl /MD kernel32.lib target\debug\rulibc.lib examples\test.c -X -Iinclude -Itarget\include -link  -NODEFAULTLIB

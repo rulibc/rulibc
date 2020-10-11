@@ -1,6 +1,8 @@
 #ifndef _BITS_ERRNO_H
 #define _BITS_ERRNO_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

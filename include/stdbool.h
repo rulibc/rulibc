@@ -1,6 +1,8 @@
 #ifndef _STDBOOL_H
 #define _STDBOOL_H
 
+#include <stddef.h>
+
 #ifndef __cplusplus
 typedef _Bool bool;
 #define true 1
