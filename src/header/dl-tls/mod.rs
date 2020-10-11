@@ -1,6 +1,8 @@
 //! dl-tls implementation for Redox
+#[cfg(not(target_os = "windows"))]
+use crate::ld_so::tcb::Tcb;
 
-use crate::{ld_so::tcb::Tcb, platform::types::*};
+use crate::platform::types::*;
 
 #[repr(C)]
 pub struct dl_tls_index {
@@ -16,6 +18,7 @@ pub unsafe extern "C" fn __tls_get_addr(ti: *mut dl_tls_index) -> *mut c_void {
         (*ti).ti_module,
         (*ti).ti_offset
     );
+    #[cfg(not(target_os = "windows"))]
     if let Some(tcb) = Tcb::current() {
         if let Some(tls) = tcb.tls() {
             if let Some(masters) = tcb.masters() {

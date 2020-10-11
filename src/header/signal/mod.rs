@@ -19,6 +19,10 @@ pub mod sys;
 #[path = "redox.rs"]
 pub mod sys;
 
+#[cfg(target_os = "windows")]
+#[path = "windows.rs"]
+pub mod sys;
+
 type SigSet = BitSet<[c_ulong; 1]>;
 
 pub const SIG_DFL: usize = 0;

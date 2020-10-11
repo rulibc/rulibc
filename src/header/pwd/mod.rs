@@ -15,14 +15,15 @@ use crate::{
 };
 
 #[cfg(target_os = "linux")]
-mod linux;
+#[path = "linux.rs"]
+pub mod sys;
 #[cfg(target_os = "redox")]
-mod redox;
+#[path = "redox.rs"]
+pub mod sys;
 
-#[cfg(target_os = "linux")]
-use self::linux as sys;
-#[cfg(target_os = "redox")]
-use self::redox as sys;
+#[cfg(target_os = "windows")]
+#[path = "windows.rs"]
+pub mod sys;
 
 #[repr(C)]
 #[derive(Debug)]
