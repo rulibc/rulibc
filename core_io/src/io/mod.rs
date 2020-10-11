@@ -267,47 +267,39 @@
 //! [`Result`]: ../result/enum.Result.html
 //! [`.unwrap()`]: ../result/enum.Result.html#method.unwrap
 
-#![stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
+use alloc::string::String;
+#[cfg(feature="alloc")]
+use alloc::vec::Vec;
+use core::cmp;
+use core::fmt;
+use core::str;
+#[cfg(feature="alloc")]
+use core::slice::memchr;
+use core::ptr;
 
-use cmp;
-use fmt;
-use str;
-use memchr;
-use ptr;
-
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 pub use self::buffered::{BufReader, BufWriter, LineWriter};
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 pub use self::buffered::IntoInnerError;
-#[stable(feature = "rust1", since = "1.0.0")]
 pub use self::cursor::Cursor;
-#[stable(feature = "rust1", since = "1.0.0")]
 pub use self::error::{Result, Error, ErrorKind};
-#[stable(feature = "rust1", since = "1.0.0")]
 pub use self::util::{copy, sink, Sink, empty, Empty, repeat, Repeat};
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use self::stdio::{stdin, stdout, stderr, Stdin, Stdout, Stderr};
-#[stable(feature = "rust1", since = "1.0.0")]
-pub use self::stdio::{StdoutLock, StderrLock, StdinLock};
-#[unstable(feature = "print_internals", issue = "0")]
-pub use self::stdio::{_print, _eprint};
-#[unstable(feature = "libstd_io_internals", issue = "42788")]
-#[doc(no_inline, hidden)]
-pub use self::stdio::{set_panic, set_print};
 
 pub mod prelude;
+#[cfg(feature="alloc")]
 mod buffered;
 mod cursor;
 mod error;
 mod impls;
-mod lazy;
 mod util;
-mod stdio;
 
-const DEFAULT_BUF_SIZE: usize = ::sys_common::io::DEFAULT_BUF_SIZE;
+const DEFAULT_BUF_SIZE: usize = 8 * 1024;
 
+#[cfg(feature="alloc")]
 struct Guard<'a> { buf: &'a mut Vec<u8>, len: usize }
 
+#[cfg(feature="alloc")]
 impl<'a> Drop for Guard<'a> {
     fn drop(&mut self) {
         unsafe { self.buf.set_len(self.len); }
@@ -332,6 +324,7 @@ impl<'a> Drop for Guard<'a> {
 // 2. We're passing a raw buffer to the function `f`, and it is expected that
 //    the function only *appends* bytes to the buffer. We'll get undefined
 //    behavior if existing bytes are overwritten to have non-UTF-8 data.
+#[cfg(feature="alloc")]
 fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>
     where F: FnOnce(&mut Vec<u8>) -> Result<usize>
 {
@@ -359,10 +352,12 @@ fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>
 //
 // Because we're extending the buffer with uninitialized data for trusted
 // readers, we need to make sure to truncate that if any of this panics.
+#[cfg(feature="alloc")]
 fn read_to_end<R: Read + ?Sized>(r: &mut R, buf: &mut Vec<u8>) -> Result<usize> {
     read_to_end_with_reservation(r, buf, 32)
 }
 
+#[cfg(feature="alloc")]
 fn read_to_end_with_reservation<R: Read + ?Sized>(r: &mut R,
                                                   buf: &mut Vec<u8>,
                                                   reservation_size: usize) -> Result<usize>
@@ -469,7 +464,6 @@ fn read_to_end_with_reservation<R: Read + ?Sized>(r: &mut R,
 /// [`BufReader`]: struct.BufReader.html
 /// [`&str`]: ../../std/primitive.str.html
 /// [slice]: ../../std/primitive.slice.html
-#[stable(feature = "rust1", since = "1.0.0")]
 #[doc(spotlight)]
 pub trait Read {
     /// Pull some bytes from this source into the specified buffer, returning
@@ -526,7 +520,6 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn read(&mut self, buf: &mut [u8]) -> Result<usize>;
 
     /// Determines if this `Read`er can work with buffers of uninitialized
@@ -551,7 +544,6 @@ pub trait Read {
     ///
     /// [`Initializer::nop()`]: ../../std/io/struct.Initializer.html#method.nop
     /// [`Initializer`]: ../../std/io/struct.Initializer.html
-    #[unstable(feature = "read_initializer", issue = "42788")]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         Initializer::zeroing()
@@ -604,7 +596,7 @@ pub trait Read {
     /// file.)
     ///
     /// [`std::fs::read`]: ../fs/fn.read.html
-    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature="alloc")]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
         read_to_end(self, buf)
     }
@@ -647,7 +639,7 @@ pub trait Read {
     /// reading from a file.)
     ///
     /// [`std::fs::read_to_string`]: ../fs/fn.read_to_string.html
-    #[stable(feature = "rust1", since = "1.0.0")]
+    #[cfg(feature="alloc")]
     fn read_to_string(&mut self, buf: &mut String) -> Result<usize> {
         // Note that we do *not* call `.read_to_end()` here. We are passing
         // `&mut Vec<u8>` (the raw contents of `buf`) into the `read_to_end`
@@ -710,7 +702,6 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "read_exact", since = "1.6.0")]
     fn read_exact(&mut self, mut buf: &mut [u8]) -> Result<()> {
         while !buf.is_empty() {
             match self.read(buf) {
@@ -762,7 +753,6 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn by_ref(&mut self) -> &mut Self where Self: Sized { self }
 
     /// Transforms this `Read` instance to an [`Iterator`] over its bytes.
@@ -799,7 +789,6 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn bytes(self) -> Bytes<Self> where Self: Sized {
         Bytes { inner: self }
     }
@@ -834,7 +823,6 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn chain<R: Read>(self, next: R) -> Chain<Self, R> where Self: Sized {
         Chain { first: self, second: next, done_first: false }
     }
@@ -870,20 +858,17 @@ pub trait Read {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn take(self, limit: u64) -> Take<Self> where Self: Sized {
         Take { inner: self, limit: limit }
     }
 }
 
 /// A type used to conditionally initialize buffers passed to `Read` methods.
-#[unstable(feature = "read_initializer", issue = "42788")]
 #[derive(Debug)]
 pub struct Initializer(bool);
 
 impl Initializer {
     /// Returns a new `Initializer` which will zero out buffers.
-    #[unstable(feature = "read_initializer", issue = "42788")]
     #[inline]
     pub fn zeroing() -> Initializer {
         Initializer(true)
@@ -897,21 +882,18 @@ impl Initializer {
     /// read from buffers passed to `Read` methods, and that the return value of
     /// the method accurately reflects the number of bytes that have been
     /// written to the head of the buffer.
-    #[unstable(feature = "read_initializer", issue = "42788")]
     #[inline]
     pub unsafe fn nop() -> Initializer {
         Initializer(false)
     }
 
     /// Indicates if a buffer should be initialized.
-    #[unstable(feature = "read_initializer", issue = "42788")]
     #[inline]
     pub fn should_initialize(&self) -> bool {
         self.0
     }
 
     /// Initializes a buffer if necessary.
-    #[unstable(feature = "read_initializer", issue = "42788")]
     #[inline]
     pub fn initialize(&self, buf: &mut [u8]) {
         if self.should_initialize() {
@@ -954,7 +936,6 @@ impl Initializer {
 ///     Ok(())
 /// }
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 #[doc(spotlight)]
 pub trait Write {
     /// Write a buffer into this object, returning how many bytes were written.
@@ -1003,7 +984,6 @@ pub trait Write {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn write(&mut self, buf: &[u8]) -> Result<usize>;
 
     /// Flush this output stream, ensuring that all intermediately buffered
@@ -1029,7 +1009,6 @@ pub trait Write {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn flush(&mut self) -> Result<()>;
 
     /// Attempts to write an entire buffer into this write.
@@ -1062,7 +1041,6 @@ pub trait Write {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn write_all(&mut self, mut buf: &[u8]) -> Result<()> {
         while !buf.is_empty() {
             match self.write(buf) {
@@ -1114,7 +1092,6 @@ pub trait Write {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn write_fmt(&mut self, fmt: fmt::Arguments) -> Result<()> {
         // Create a shim which translates a Write to a fmt::Write and saves
         // off I/O errors. instead of discarding them
@@ -1170,7 +1147,6 @@ pub trait Write {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn by_ref(&mut self) -> &mut Self where Self: Sized { self }
 }
 
@@ -1200,7 +1176,6 @@ pub trait Write {
 ///     Ok(())
 /// }
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub trait Seek {
     /// Seek to an offset, in bytes, in a stream.
     ///
@@ -1216,7 +1191,6 @@ pub trait Seek {
     /// Seeking to a negative offset is considered an error.
     ///
     /// [`SeekFrom::Start`]: enum.SeekFrom.html#variant.Start
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn seek(&mut self, pos: SeekFrom) -> Result<u64>;
 }
 
@@ -1226,29 +1200,26 @@ pub trait Seek {
 ///
 /// [`Seek`]: trait.Seek.html
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub enum SeekFrom {
     /// Set the offset to the provided number of bytes.
-    #[stable(feature = "rust1", since = "1.0.0")]
-    Start(#[stable(feature = "rust1", since = "1.0.0")] u64),
+    Start(u64),
 
     /// Set the offset to the size of this object plus the specified number of
     /// bytes.
     ///
     /// It is possible to seek beyond the end of an object, but it's an error to
     /// seek before byte 0.
-    #[stable(feature = "rust1", since = "1.0.0")]
-    End(#[stable(feature = "rust1", since = "1.0.0")] i64),
+    End(i64),
 
     /// Set the offset to the current position plus the specified number of
     /// bytes.
     ///
     /// It is possible to seek beyond the end of an object, but it's an error to
     /// seek before byte 0.
-    #[stable(feature = "rust1", since = "1.0.0")]
-    Current(#[stable(feature = "rust1", since = "1.0.0")] i64),
+    Current(i64),
 }
 
+#[cfg(feature="alloc")]
 fn read_until<R: BufRead + ?Sized>(r: &mut R, delim: u8, buf: &mut Vec<u8>)
                                    -> Result<usize> {
     let mut read = 0;
@@ -1328,7 +1299,7 @@ fn read_until<R: BufRead + ?Sized>(r: &mut R, delim: u8, buf: &mut Vec<u8>)
 /// }
 /// ```
 ///
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 pub trait BufRead: Read {
     /// Returns the contents of the internal buffer, filling it with more data
     /// from the inner reader if it is empty.
@@ -1374,7 +1345,6 @@ pub trait BufRead: Read {
     /// // ensure the bytes we worked with aren't returned again later
     /// stdin.consume(length);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn fill_buf(&mut self) -> Result<&[u8]>;
 
     /// Tells this buffer that `amt` bytes have been consumed from the buffer,
@@ -1396,7 +1366,6 @@ pub trait BufRead: Read {
     /// that method's example includes an example of `consume()`.
     ///
     /// [`fill_buf`]: #tymethod.fill_buf
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn consume(&mut self, amt: usize);
 
     /// Read all bytes into `buf` until the delimiter `byte` or EOF is reached.
@@ -1452,7 +1421,6 @@ pub trait BufRead: Read {
     /// assert_eq!(num_bytes, 0);
     /// assert_eq!(buf, b"");
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn read_until(&mut self, byte: u8, buf: &mut Vec<u8>) -> Result<usize> {
         read_until(self, byte, buf)
     }
@@ -1511,7 +1479,6 @@ pub trait BufRead: Read {
     /// assert_eq!(num_bytes, 0);
     /// assert_eq!(buf, "");
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn read_line(&mut self, buf: &mut String) -> Result<usize> {
         // Note that we are not calling the `.read_until` method here, but
         // rather our hardcoded implementation. For more details as to why, see
@@ -1552,7 +1519,6 @@ pub trait BufRead: Read {
     /// assert_eq!(split_iter.next(), Some(b"dolor".to_vec()));
     /// assert_eq!(split_iter.next(), None);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn split(self, byte: u8) -> Split<Self> where Self: Sized {
         Split { buf: self, delim: byte }
     }
@@ -1591,7 +1557,6 @@ pub trait BufRead: Read {
     /// Each line of the iterator has the same error semantics as [`BufRead::read_line`].
     ///
     /// [`BufRead::read_line`]: trait.BufRead.html#method.read_line
-    #[stable(feature = "rust1", since = "1.0.0")]
     fn lines(self) -> Lines<Self> where Self: Sized {
         Lines { buf: self }
     }
@@ -1603,7 +1568,6 @@ pub trait BufRead: Read {
 /// Please see the documentation of [`chain`] for more details.
 ///
 /// [`chain`]: trait.Read.html#method.chain
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Chain<T, U> {
     first: T,
     second: U,
@@ -1629,7 +1593,6 @@ impl<T, U> Chain<T, U> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "more_io_inner_methods", since = "1.20.0")]
     pub fn into_inner(self) -> (T, U) {
         (self.first, self.second)
     }
@@ -1652,7 +1615,6 @@ impl<T, U> Chain<T, U> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "more_io_inner_methods", since = "1.20.0")]
     pub fn get_ref(&self) -> (&T, &U) {
         (&self.first, &self.second)
     }
@@ -1679,13 +1641,11 @@ impl<T, U> Chain<T, U> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "more_io_inner_methods", since = "1.20.0")]
     pub fn get_mut(&mut self) -> (&mut T, &mut U) {
         (&mut self.first, &mut self.second)
     }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl<T: fmt::Debug, U: fmt::Debug> fmt::Debug for Chain<T, U> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Chain")
@@ -1695,7 +1655,6 @@ impl<T: fmt::Debug, U: fmt::Debug> fmt::Debug for Chain<T, U> {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Read, U: Read> Read for Chain<T, U> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         if !self.done_first {
@@ -1717,7 +1676,7 @@ impl<T: Read, U: Read> Read for Chain<T, U> {
     }
 }
 
-#[stable(feature = "chain_bufread", since = "1.9.0")]
+#[cfg(feature="alloc")]
 impl<T: BufRead, U: BufRead> BufRead for Chain<T, U> {
     fn fill_buf(&mut self) -> Result<&[u8]> {
         if !self.done_first {
@@ -1744,7 +1703,6 @@ impl<T: BufRead, U: BufRead> BufRead for Chain<T, U> {
 /// Please see the documentation of [`take`] for more details.
 ///
 /// [`take`]: trait.Read.html#method.take
-#[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
 pub struct Take<T> {
     inner: T,
@@ -1779,7 +1737,6 @@ impl<T> Take<T> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn limit(&self) -> u64 { self.limit }
 
     /// Sets the number of bytes that can be read before this instance will
@@ -1805,7 +1762,6 @@ impl<T> Take<T> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "take_set_limit", since = "1.27.0")]
     pub fn set_limit(&mut self, limit: u64) {
         self.limit = limit;
     }
@@ -1830,7 +1786,6 @@ impl<T> Take<T> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "io_take_into_inner", since = "1.15.0")]
     pub fn into_inner(self) -> T {
         self.inner
     }
@@ -1855,7 +1810,6 @@ impl<T> Take<T> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "more_io_inner_methods", since = "1.20.0")]
     pub fn get_ref(&self) -> &T {
         &self.inner
     }
@@ -1884,13 +1838,11 @@ impl<T> Take<T> {
     ///     Ok(())
     /// }
     /// ```
-    #[stable(feature = "more_io_inner_methods", since = "1.20.0")]
     pub fn get_mut(&mut self) -> &mut T {
         &mut self.inner
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Read> Read for Take<T> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         // Don't call into inner reader at all at EOF because it may still block
@@ -1908,6 +1860,7 @@ impl<T: Read> Read for Take<T> {
         self.inner.initializer()
     }
 
+    #[cfg(feature="alloc")]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
         let reservation_size = cmp::min(self.limit, 32) as usize;
 
@@ -1915,7 +1868,7 @@ impl<T: Read> Read for Take<T> {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<T: BufRead> BufRead for Take<T> {
     fn fill_buf(&mut self) -> Result<&[u8]> {
         // Don't call into inner reader at all at EOF because it may still block
@@ -1954,13 +1907,11 @@ fn read_one_byte(reader: &mut dyn Read) -> Option<Result<u8>> {
 /// Please see the documentation of [`bytes`] for more details.
 ///
 /// [`bytes`]: trait.Read.html#method.bytes
-#[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
 pub struct Bytes<R> {
     inner: R,
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<R: Read> Iterator for Bytes<R> {
     type Item = Result<u8>;
 
@@ -1976,14 +1927,14 @@ impl<R: Read> Iterator for Bytes<R> {
 /// `BufRead`. Please see the documentation of `split()` for more details.
 ///
 /// [split]: trait.BufRead.html#method.split
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 #[derive(Debug)]
 pub struct Split<B> {
     buf: B,
     delim: u8,
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<B: BufRead> Iterator for Split<B> {
     type Item = Result<Vec<u8>>;
 
@@ -2008,13 +1959,13 @@ impl<B: BufRead> Iterator for Split<B> {
 /// `BufRead`. Please see the documentation of `lines()` for more details.
 ///
 /// [lines]: trait.BufRead.html#method.lines
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 #[derive(Debug)]
 pub struct Lines<B> {
     buf: B,
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<B: BufRead> Iterator for Lines<B> {
     type Item = Result<String>;
 

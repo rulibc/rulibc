@@ -8,15 +8,18 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use cmp;
-use io::{self, SeekFrom, Read, Initializer, Write, Seek, BufRead, Error, ErrorKind};
-use fmt;
-use mem;
+#[cfg(feature="alloc")] use alloc::boxed::Box;
+use core::cmp;
+use io::{self, SeekFrom, Read, Initializer, Write, Seek, Error, ErrorKind};
+#[cfg(feature="alloc")] use io::BufRead;
+use core::fmt;
+use core::mem;
+#[cfg(feature="alloc")] use alloc::string::String;
+#[cfg(feature="alloc")] use alloc::vec::Vec;
 
 // =============================================================================
 // Forwarding implementations
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, R: Read + ?Sized> Read for &'a mut R {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -28,11 +31,13 @@ impl<'a, R: Read + ?Sized> Read for &'a mut R {
         (**self).initializer()
     }
 
+    #[cfg(feature="alloc")]
     #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
         (**self).read_to_end(buf)
     }
 
+    #[cfg(feature="alloc")]
     #[inline]
     fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
         (**self).read_to_string(buf)
@@ -43,7 +48,6 @@ impl<'a, R: Read + ?Sized> Read for &'a mut R {
         (**self).read_exact(buf)
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, W: Write + ?Sized> Write for &'a mut W {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> { (**self).write(buf) }
@@ -61,12 +65,11 @@ impl<'a, W: Write + ?Sized> Write for &'a mut W {
         (**self).write_fmt(fmt)
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, S: Seek + ?Sized> Seek for &'a mut S {
     #[inline]
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> { (**self).seek(pos) }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<'a, B: BufRead + ?Sized> BufRead for &'a mut B {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> { (**self).fill_buf() }
@@ -85,7 +88,7 @@ impl<'a, B: BufRead + ?Sized> BufRead for &'a mut B {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<R: Read + ?Sized> Read for Box<R> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -97,11 +100,13 @@ impl<R: Read + ?Sized> Read for Box<R> {
         (**self).initializer()
     }
 
+    #[cfg(feature="alloc")]
     #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
         (**self).read_to_end(buf)
     }
 
+    #[cfg(feature="alloc")]
     #[inline]
     fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
         (**self).read_to_string(buf)
@@ -112,7 +117,7 @@ impl<R: Read + ?Sized> Read for Box<R> {
         (**self).read_exact(buf)
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<W: Write + ?Sized> Write for Box<W> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> { (**self).write(buf) }
@@ -130,12 +135,12 @@ impl<W: Write + ?Sized> Write for Box<W> {
         (**self).write_fmt(fmt)
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<S: Seek + ?Sized> Seek for Box<S> {
     #[inline]
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> { (**self).seek(pos) }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<B: BufRead + ?Sized> BufRead for Box<B> {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> { (**self).fill_buf() }
@@ -161,7 +166,6 @@ impl<B: BufRead + ?Sized> BufRead for Box<B> {
 ///
 /// Note that reading updates the slice to point to the yet unread part.
 /// The slice will be empty when EOF is reached.
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Read for &'a [u8] {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -207,6 +211,7 @@ impl<'a> Read for &'a [u8] {
         Ok(())
     }
 
+    #[cfg(feature="alloc")]
     #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
         buf.extend_from_slice(*self);
@@ -216,7 +221,7 @@ impl<'a> Read for &'a [u8] {
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl<'a> BufRead for &'a [u8] {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> { Ok(*self) }
@@ -230,7 +235,6 @@ impl<'a> BufRead for &'a [u8] {
 ///
 /// Note that writing updates the slice to point to the yet unwritten part.
 /// The slice will be empty when it has been completely overwritten.
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Write for &'a mut [u8] {
     #[inline]
     fn write(&mut self, data: &[u8]) -> io::Result<usize> {
@@ -256,7 +260,7 @@ impl<'a> Write for &'a mut [u8] {
 
 /// Write is implemented for `Vec<u8>` by appending to the vector.
 /// The vector will grow as needed.
-#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(feature="alloc")]
 impl Write for Vec<u8> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {

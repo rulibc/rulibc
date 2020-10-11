@@ -10,9 +10,10 @@
 
 #![allow(missing_copy_implementations)]
 
-use fmt;
-use io::{self, Read, Initializer, Write, ErrorKind, BufRead};
-use mem;
+use core::fmt;
+use io::{self, Read, Initializer, Write, ErrorKind};
+use core::mem;
+#[cfg(feature="alloc")] use io::BufRead;
 
 /// Copies the entire contents of a reader into a writer.
 ///
@@ -49,7 +50,6 @@ use mem;
 ///     Ok(())
 /// }
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn copy<R: ?Sized, W: ?Sized>(reader: &mut R, writer: &mut W) -> io::Result<u64>
     where R: Read, W: Write
 {
@@ -78,7 +78,6 @@ pub fn copy<R: ?Sized, W: ?Sized>(reader: &mut R, writer: &mut W) -> io::Result<
 /// the documentation of [`empty()`][`empty`] for more details.
 ///
 /// [`empty`]: fn.empty.html
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Empty { _priv: () }
 
 /// Constructs a new handle to an empty reader.
@@ -98,10 +97,8 @@ pub struct Empty { _priv: () }
 /// io::empty().read_to_string(&mut buffer).unwrap();
 /// assert!(buffer.is_empty());
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn empty() -> Empty { Empty { _priv: () } }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Read for Empty {
     #[inline]
     fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> { Ok(0) }
@@ -111,7 +108,8 @@ impl Read for Empty {
         Initializer::nop()
     }
 }
-#[stable(feature = "rust1", since = "1.0.0")]
+
+#[cfg(feature="alloc")]
 impl BufRead for Empty {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> { Ok(&[]) }
@@ -119,7 +117,6 @@ impl BufRead for Empty {
     fn consume(&mut self, _n: usize) {}
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Empty {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.pad("Empty { .. }")
@@ -132,7 +129,6 @@ impl fmt::Debug for Empty {
 /// see the documentation of `repeat()` for more details.
 ///
 /// [repeat]: fn.repeat.html
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Repeat { byte: u8 }
 
 /// Creates an instance of a reader that infinitely repeats one byte.
@@ -149,10 +145,8 @@ pub struct Repeat { byte: u8 }
 /// io::repeat(0b101).read_exact(&mut buffer).unwrap();
 /// assert_eq!(buffer, [0b101, 0b101, 0b101]);
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn repeat(byte: u8) -> Repeat { Repeat { byte: byte } }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Read for Repeat {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -168,7 +162,6 @@ impl Read for Repeat {
     }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Repeat {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.pad("Repeat { .. }")
@@ -181,7 +174,6 @@ impl fmt::Debug for Repeat {
 /// see the documentation of `sink()` for more details.
 ///
 /// [sink]: fn.sink.html
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Sink { _priv: () }
 
 /// Creates an instance of a writer which will successfully consume all data.
@@ -198,10 +190,8 @@ pub struct Sink { _priv: () }
 /// let num_bytes = io::sink().write(&buffer).unwrap();
 /// assert_eq!(num_bytes, 5);
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 pub fn sink() -> Sink { Sink { _priv: () } }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Write for Sink {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> { Ok(buf.len()) }
@@ -209,7 +199,6 @@ impl Write for Sink {
     fn flush(&mut self) -> io::Result<()> { Ok(()) }
 }
 
-#[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for Sink {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.pad("Sink { .. }")
