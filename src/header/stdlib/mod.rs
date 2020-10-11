@@ -266,6 +266,7 @@ pub unsafe extern "C" fn erand48(xsubi: *mut c_ushort) -> c_double {
     rand48::f64_from_x(new_xsubi_value)
 }
 
+#[cfg(not(target_os = "windows"))]
 #[no_mangle]
 pub unsafe extern "C" fn exit(status: c_int) {
     extern "C" {
@@ -294,6 +295,12 @@ pub unsafe extern "C" fn exit(status: c_int) {
 
     pthread_terminate();
 
+    Sys::exit(status);
+}
+
+#[cfg(target_os = "windows")]
+#[no_mangle]
+pub unsafe extern "C" fn exit(status: c_int) {
     Sys::exit(status);
 }
 

@@ -13,6 +13,7 @@
 #![feature(lang_items)]
 #![feature(linkage)]
 #![feature(llvm_asm)]
+#![feature(naked_functions)]
 #![feature(maybe_uninit_extra)]
 #![feature(stmt_expr_attributes)]
 #![feature(str_internals)]
@@ -27,6 +28,7 @@
 
 #[macro_use]
 extern crate alloc;
+#[cfg(not(target_os = "windows"))]
 extern crate goblin;
 #[macro_use]
 extern crate lazy_static;
@@ -50,9 +52,13 @@ pub mod db;
 pub mod fs;
 pub mod header;
 pub mod io;
+#[cfg(not(target_os = "windows"))]
 pub mod ld_so;
 pub mod platform;
+#[cfg(not(target_os = "windows"))]
 pub mod start;
+#[cfg(target_os = "windows")]
+pub mod start_windows;
 pub mod sync;
 
 use crate::platform::{Allocator, Pal, Sys, NEWALLOCATOR};
