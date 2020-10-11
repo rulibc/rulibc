@@ -1,4 +1,4 @@
-// Start code adapted from https://gitlab.redox-os.org/redox-os/relibc/blob/master/src/start.rs
+// Start code adapted from https://gitlab.redox-os.org/redox-os/rulibc/blob/master/src/start.rs
 
 use alloc::{
     borrow::ToOwned,
@@ -159,7 +159,7 @@ fn resolve_path_name(
     None
 }
 #[no_mangle]
-pub extern "C" fn relibc_ld_so_start(sp: &'static mut Stack, ld_entry: usize) -> usize {
+pub extern "C" fn rulibc_ld_so_start(sp: &'static mut Stack, ld_entry: usize) -> usize {
     // First thing we initialize the mspace
     ALLOCATOR.set_book_keeper(new_mspace());
     // next we get the arguments, the environment, and the auxilary vector

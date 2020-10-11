@@ -46,7 +46,7 @@ pub fn init_state() -> &'static State {
 }
 pub fn is_traceme(pid: pid_t) -> bool {
     File::open(
-        &CString::new(format!("chan:ptrace-relibc/{}/traceme", pid)).unwrap(),
+        &CString::new(format!("chan:ptrace-rulibc/{}/traceme", pid)).unwrap(),
         fcntl::O_PATH,
     )
     .is_ok()
@@ -102,7 +102,7 @@ fn inner_ptrace(
         // Mark this child as traced, parent will check for this marker file
         let pid = Sys::getpid();
         mem::forget(File::open(
-            &CString::new(format!("chan:ptrace-relibc/{}/traceme", pid)).unwrap(),
+            &CString::new(format!("chan:ptrace-rulibc/{}/traceme", pid)).unwrap(),
             fcntl::O_CREAT | fcntl::O_PATH | fcntl::O_EXCL,
         )?);
         return Ok(0);

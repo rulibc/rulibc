@@ -1,4 +1,4 @@
-//! pwd implementation for relibc
+//! pwd implementation for rulibc
 
 use alloc::{boxed::Box, vec::Vec};
 use core::{
