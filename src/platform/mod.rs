@@ -21,9 +21,14 @@ mod sys;
 #[path = "redox/mod.rs"]
 mod sys;
 
+#[cfg(all(not(feature = "no_std"), target_os = "windows"))]
+#[path = "windows/mod.rs"]
+mod sys;
+
 #[cfg(test)]
 mod test;
 
+#[cfg(not(target_os = "windows"))]
 mod pte;
 
 pub use self::rlb::{Line, RawLineBuffer};

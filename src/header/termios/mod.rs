@@ -15,6 +15,10 @@ pub mod sys;
 #[path = "redox.rs"]
 pub mod sys;
 
+#[cfg(target_os = "windows")]
+#[path = "windows.rs"]
+pub mod sys;
+
 pub type cc_t = u8;
 pub type speed_t = u32;
 pub type tcflag_t = u32;

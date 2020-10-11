@@ -14,6 +14,10 @@ pub mod sys;
 #[path = "redox.rs"]
 pub mod sys;
 
+#[cfg(target_os = "windows")]
+#[path = "windows.rs"]
+pub mod sys;
+
 pub const MAP_SHARED: c_int = 0x0001;
 pub const MAP_PRIVATE: c_int = 0x0002;
 pub const MAP_TYPE: c_int = 0x000F;
@@ -76,6 +80,9 @@ static SHM_PATH: &'static [u8] = b"/dev/shm/";
 
 #[cfg(target_os = "redox")]
 static SHM_PATH: &'static [u8] = b"shm:";
+
+#[cfg(target_os = "windows")]
+static SHM_PATH: &'static [u8] = b"Global\\";
 
 unsafe fn shm_path(name: *const c_char) -> CString {
     let name_c = CStr::from_ptr(name);

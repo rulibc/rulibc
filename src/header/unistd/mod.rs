@@ -169,6 +169,9 @@ const PATH_SEPARATOR: u8 = b':';
 #[cfg(target_os = "redox")]
 const PATH_SEPARATOR: u8 = b';';
 
+#[cfg(target_os = "windows")]
+const PATH_SEPARATOR: u8 = b';';
+
 #[no_mangle]
 pub unsafe extern "C" fn execvp(file: *const c_char, argv: *const *mut c_char) -> c_int {
     let file = CStr::from_ptr(file);
