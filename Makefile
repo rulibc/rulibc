@@ -101,7 +101,8 @@ sysroot: all
 	rm -rf $@.partial
 	mkdir -p $@.partial
 	$(MAKE) install DESTDIR=$@.partial
-	mv $@.partial $@
+	rm -rf $@
+	ln -s -r $@.partial $@
 	touch $@
 
 test: sysroot
@@ -192,7 +193,8 @@ $(BUILD)/openlibm: openlibm
 	rm -rf $@ $@.partial
 	mkdir -p $(BUILD)
 	cp -r $< $@.partial
-	mv $@.partial $@
+	rm -rf $@
+	ln -s -r $@.partial $@
 	touch $@
 
 $(BUILD)/openlibm/libopenlibm.a: $(BUILD)/openlibm $(BUILD)/release/librelibc.a
@@ -202,7 +204,8 @@ $(BUILD)/pthreads-emb: pthreads-emb
 	rm -rf $@ $@.partial
 	mkdir -p $(BUILD)
 	cp -r $< $@.partial
-	mv $@.partial $@
+	rm -rf $@
+	ln -s -r $@.partial $@
 	touch $@
 
 $(BUILD)/pthreads-emb/libpthread.a: $(BUILD)/pthreads-emb $(BUILD)/release/librelibc.a
