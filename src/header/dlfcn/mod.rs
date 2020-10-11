@@ -5,13 +5,17 @@ use core::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{c_str::CStr, ld_so::tcb::Tcb, platform::types::*};
+use crate::platform::types::*;
+
+#[cfg(not(target_os = "windows"))]
+use crate::{c_str::CStr, ld_so::tcb::Tcb};
 
 pub const RTLD_LAZY: c_int = 0x0001;
 pub const RTLD_NOW: c_int = 0x0002;
 pub const RTLD_GLOBAL: c_int = 0x0100;
 pub const RTLD_LOCAL: c_int = 0x0000;
 
+#[cfg(not(target_os = "windows"))]
 static ERROR_NOT_SUPPORTED: &'static CStr = c_str!("dlfcn not supported");
 
 #[thread_local]
@@ -35,6 +39,7 @@ pub unsafe extern "C" fn dladdr(addr: *mut c_void, info: *mut Dl_info) -> c_int 
     0
 }
 
+#[cfg(not(target_os = "windows"))]
 #[no_mangle]
 pub unsafe extern "C" fn dlopen(cfilename: *const c_char, flags: c_int) -> *mut c_void {
     //TODO support all sort of flags
@@ -92,6 +97,13 @@ pub unsafe extern "C" fn dlopen(cfilename: *const c_char, flags: c_int) -> *mut 
     id as *mut c_void
 }
 
+#[cfg(target_os = "windows")]
+#[no_mangle]
+pub unsafe extern "C" fn dlopen(cfilename: *const c_char, flags: c_int) -> *mut c_void {
+    unimplemented!();
+}
+
+#[cfg(not(target_os = "windows"))]
 #[no_mangle]
 pub unsafe extern "C" fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void {
     if symbol.is_null() {
@@ -128,6 +140,13 @@ pub unsafe extern "C" fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *m
     }
 }
 
+#[cfg(target_os = "windows")]
+#[no_mangle]
+pub unsafe extern "C" fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void {
+    unimplemented!();
+}
+
+#[cfg(not(target_os = "windows"))]
 #[no_mangle]
 pub unsafe extern "C" fn dlclose(handle: *mut c_void) -> c_int {
     let tcb = match Tcb::current() {
@@ -153,6 +172,12 @@ pub unsafe extern "C" fn dlclose(handle: *mut c_void) -> c_int {
     };
     (cbs.unload)(&mut linker, handle as usize);
     0
+}
+
+#[cfg(target_os = "windows")]
+#[no_mangle]
+pub unsafe extern "C" fn dlclose(handle: *mut c_void) -> c_int {
+    unimplemented!();
 }
 
 #[no_mangle]
