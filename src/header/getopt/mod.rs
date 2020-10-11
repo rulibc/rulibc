@@ -1,4 +1,4 @@
-//! getopt implementation for relibc
+//! getopt implementation for rulibc
 
 use crate::{
     header::{

@@ -1,11 +1,11 @@
 [package]
-name = "relibc"
+name = "rulibc"
 version = "0.1.0"
-authors = ["Jeremy Soller <jackpot51@gmail.com>"]
+authors = ["Yonggang Luo <luoyonggang@gmail.com>", "Jeremy Soller <jackpot51@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "relibc"
+name = "rulibc"
 crate-type = ["staticlib"]
 bench = false
 test = false

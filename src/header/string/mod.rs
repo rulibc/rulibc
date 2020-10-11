@@ -148,7 +148,7 @@ pub unsafe extern "C" fn strcmp(s1: *const c_char, s2: *const c_char) -> c_int {
 
 #[no_mangle]
 pub unsafe extern "C" fn strcoll(s1: *const c_char, s2: *const c_char) -> c_int {
-    // relibc has no locale stuff (yet)
+    // rulibc has no locale stuff (yet)
     strcmp(s1, s2)
 }
 
@@ -454,7 +454,7 @@ pub unsafe extern "C" fn strtok_r(
 
 #[no_mangle]
 pub unsafe extern "C" fn strxfrm(s1: *mut c_char, s2: *const c_char, n: size_t) -> size_t {
-    // relibc has no locale stuff (yet)
+    // rulibc has no locale stuff (yet)
     let len = strlen(s2);
     if len < n {
         strcpy(s1, s2);

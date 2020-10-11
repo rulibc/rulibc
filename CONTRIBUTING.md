@@ -20,7 +20,7 @@ any optimisation.
 
 ## Code style
 
-We have a `rustfmt.toml` in the root directory of relibc. Please run `./fmt.sh`
+We have a `rustfmt.toml` in the root directory of rulibc. Please run `./fmt.sh`
 before sending in any merge requests as it will automatically format your code.
 
 With regards to general style:
@@ -40,7 +40,7 @@ This is so we can guarantee that everything works across platforms. While it is
 generally accepted these days that an `int` has 32 bits (which matches against
 an `i32`), some platforms have `int` as having 16 bits, and others have long as
 being 32 bits instead of 64. If you use the types in platform, then we can
-guarantee that your code will "just work" should we port relibc to a different
+guarantee that your code will "just work" should we port rulibc to a different
 architecture.
 
 ### Use our internal functions
@@ -57,7 +57,7 @@ If you have sent us a merge request, first of all, thanks for taking your time
 to help us!
 
 The first thing to note is that we do most of our development on our 
-[GitLab server](https://gitlab.redox-os.org/redox-os/relibc), and as such it is
+[GitLab server](https://gitlab.redox-os.org/redox-os/rulibc), and as such it is
 possible that none of the maintainers will see your merge request if it is
 opened on GitHub.
 
@@ -112,12 +112,12 @@ Running tests is an important part in trying to find bugs. Before opening a
 merge request, we ask that you test on your own machine to make sure there are
 no regressions.
 
-You can run tests with `make test` in the root directory of relibc to compile
-relibc, compile the tests and run them. This *will* print a lot of output to
+You can run tests with `make test` in the root directory of rulibc to compile
+rulibc, compile the tests and run them. This *will* print a lot of output to
 stdout, so be warned!
 
 You can test against verified correct output with `make verify` in the tests 
 directory. You will need to manually create the correct output and put it in the
 tests/expected directory. Running any `make` commands in the tests directory
-will ***not*** rebuild relibc, so you'll need to go back to the root directory
-if you need to rebuild relibc.
+will ***not*** rebuild rulibc, so you'll need to go back to the root directory
+if you need to rebuild rulibc.
