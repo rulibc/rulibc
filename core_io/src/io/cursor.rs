@@ -1,12 +1,11 @@
-#[cfg(test)]
-mod tests;
+// except according to those terms.
 
-use crate::io::prelude::*;
+use io::prelude::*;
 
-use crate::cmp;
-use crate::io::{self, Error, ErrorKind, Initializer, IoSlice, IoSliceMut, SeekFrom};
-
+use alloc::boxed::Box;
 use core::convert::TryInto;
+use core::cmp;
+use io::{self, Initializer, SeekFrom, Error, ErrorKind};
 
 /// A `Cursor` wraps an in-memory buffer and provides it with a
 /// [`Seek`] implementation.
@@ -70,7 +69,6 @@ use core::convert::TryInto;
 ///     assert_eq!(&buff.get_ref()[5..15], &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 /// }
 /// ```
-#[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Cursor<T> {
     inner: T,
@@ -93,7 +91,6 @@ impl<T> Cursor<T> {
     /// # fn force_inference(_: &Cursor<Vec<u8>>) {}
     /// # force_inference(&buff);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new(inner: T) -> Cursor<T> {
         Cursor { pos: 0, inner }
     }
@@ -111,7 +108,6 @@ impl<T> Cursor<T> {
     ///
     /// let vec = buff.into_inner();
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn into_inner(self) -> T {
         self.inner
     }
@@ -129,7 +125,6 @@ impl<T> Cursor<T> {
     ///
     /// let reference = buff.get_ref();
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn get_ref(&self) -> &T {
         &self.inner
     }
@@ -150,7 +145,6 @@ impl<T> Cursor<T> {
     ///
     /// let reference = buff.get_mut();
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn get_mut(&mut self) -> &mut T {
         &mut self.inner
     }
@@ -174,7 +168,6 @@ impl<T> Cursor<T> {
     /// buff.seek(SeekFrom::Current(-1)).unwrap();
     /// assert_eq!(buff.position(), 1);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn position(&self) -> u64 {
         self.pos
     }
@@ -196,13 +189,11 @@ impl<T> Cursor<T> {
     /// buff.set_position(4);
     /// assert_eq!(buff.position(), 4);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn set_position(&mut self, pos: u64) {
         self.pos = pos;
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<T> io::Seek for Cursor<T>
 where
     T: AsRef<[u8]>,
@@ -242,7 +233,6 @@ where
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<T> Read for Cursor<T>
 where
     T: AsRef<[u8]>,
@@ -282,7 +272,6 @@ where
     }
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<T> BufRead for Cursor<T>
 where
     T: AsRef<[u8]>,
@@ -363,7 +352,6 @@ fn vec_write_vectored(
     Ok(nwritten)
 }
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Write for Cursor<&mut [u8]> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
