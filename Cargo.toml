@@ -10,7 +10,7 @@ crate-type = ["staticlib"]
 
 [workspace]
 members = ["src/crt0", "src/crti", "src/crtn", "src/ld_so"]
-exclude = ["core_io", "ralloc"]
+exclude = ["core_io"]
 
 [build-dependencies]
 cbindgen = "0.13.2"
@@ -30,10 +30,6 @@ version = "0.0.21"
 default-features = false
 features = ["elf32", "elf64", "endian_fd"]
 
-[dependencies.ralloc]
-path = "ralloc"
-default-features = false
-optional = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sc = "0.2.3"
