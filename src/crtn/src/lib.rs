@@ -44,7 +44,7 @@ global_asm!(
 #[no_mangle]
 pub unsafe extern "C" fn rust_begin_unwind(pi: &::core::panic::PanicInfo) -> ! {
     extern "C" {
-        fn relibc_panic(pi: &::core::panic::PanicInfo) -> !;
+        fn rulibc_panic(pi: &::core::panic::PanicInfo) -> !;
     }
-    relibc_panic(pi)
+    rulibc_panic(pi)
 }

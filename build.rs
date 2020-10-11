@@ -73,9 +73,9 @@ fn main() {
                 .expect("src/c directory missing")
                 .map(|res| res.expect("read_dir error").path()),
         )
-        .compile("relibc_c");
+        .compile("rulibc_c");
 
-    println!("cargo:rustc-link-lib=static=relibc_c");
+    println!("cargo:rustc-link-lib=static=rulibc_c");
 }
 
 //

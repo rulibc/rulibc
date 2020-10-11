@@ -56,7 +56,7 @@ unsafe fn copy_string_array(array: *const *const c_char, len: usize) -> Vec<*mut
 // Since Redox and Linux are so similar, it is easy to accidentally run a binary from one on the
 // other. This will test that the current system is compatible with the current binary
 #[no_mangle]
-pub unsafe fn relibc_verify_host() {
+pub unsafe fn rulibc_verify_host() {
     if !Sys::verify() {
         intrinsics::abort();
     }
@@ -83,7 +83,7 @@ fn alloc_init() {
 
 extern "C" fn init_array() {
     // The thing is that we cannot guarantee if
-    // init_array runs first or if relibc_start runs first
+    // init_array runs first or if rulibc_start runs first
     // Still whoever gets to run first must initialize rust
     // memory allocator before doing anything else.
 
@@ -115,7 +115,7 @@ fn io_init() {
 
 #[inline(never)]
 #[no_mangle]
-pub unsafe extern "C" fn relibc_start(sp: &'static Stack) -> ! {
+pub unsafe extern "C" fn rulibc_start(sp: &'static Stack) -> ! {
     extern "C" {
         static __preinit_array_start: extern "C" fn();
         static __preinit_array_end: extern "C" fn();
@@ -127,7 +127,7 @@ pub unsafe extern "C" fn relibc_start(sp: &'static Stack) -> ! {
     }
 
     // Ensure correct host system before executing more system calls
-    relibc_verify_host();
+    rulibc_verify_host();
 
     // Initialize TLS, if necessary
     ld_so::init(sp);
