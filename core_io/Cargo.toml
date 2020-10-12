@@ -23,6 +23,9 @@ include = [
 [build-dependencies]
 rustc_version = "0.2.3"
 
+[dependencies]
+platform_types = { path = "../platform_types" }
+
 [features]
 alloc = []
 collections = ["alloc"]

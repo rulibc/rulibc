@@ -13,6 +13,7 @@ extern crate alloc;
 extern crate rustc_unicode;
 #[cfg(std_unicode)]
 extern crate std_unicode;
+extern crate platform_types;
 
 #[path="io/mod.rs"] mod io;
 
