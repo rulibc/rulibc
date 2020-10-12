@@ -1,0 +1,20 @@
+[package]
+name = "platform_types"
+version = "0.1.1"
+authors = ["Yonggang Luo <luoyonggang@gmail.com>", "Jorge Aparicio"]
+license = "MIT/Apache-2.0"
+description = """
+The is only define the core c types that are may or may not platform dependent,
+as a shared type system for rust runtime and c runtime.
+Based on https://github.com/japaric/cty
+"""
+repository = "https://github.com/rulibc/rulibc"
+keywords = ["core", "no_std", "io", "read", "write"]
+include = [
+	"Cargo.toml",
+	"LICENSE-*",
+	"src/**/*.rs",
+]
+
+[build-dependencies]
+rustc_version = "0.2.3"
