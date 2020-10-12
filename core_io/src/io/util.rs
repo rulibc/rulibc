@@ -13,7 +13,7 @@
 use core::fmt;
 use io::{self, Read, Initializer, Write, ErrorKind};
 use core::mem;
-#[cfg(feature="alloc")] use io::BufRead;
+use io::BufRead;
 
 /// Copies the entire contents of a reader into a writer.
 ///
@@ -108,8 +108,6 @@ impl Read for Empty {
         Initializer::nop()
     }
 }
-
-#[cfg(feature="alloc")]
 impl BufRead for Empty {
     #[inline]
     fn fill_buf(&mut self) -> io::Result<&[u8]> { Ok(&[]) }

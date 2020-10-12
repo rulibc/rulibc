@@ -267,27 +267,21 @@
 //! [`Result`]: ../result/enum.Result.html
 //! [`.unwrap()`]: ../result/enum.Result.html#method.unwrap
 
-#[cfg(feature="alloc")]
 use alloc::string::String;
-#[cfg(feature="alloc")]
 use alloc::vec::Vec;
 use core::cmp;
 use core::fmt;
 use core::str;
-#[cfg(feature="alloc")]
 use core::slice::memchr;
 use core::ptr;
 
-#[cfg(feature="alloc")]
 pub use self::buffered::{BufReader, BufWriter, LineWriter};
-#[cfg(feature="alloc")]
 pub use self::buffered::IntoInnerError;
 pub use self::cursor::Cursor;
 pub use self::error::{Result, Error, ErrorKind};
 pub use self::util::{copy, sink, Sink, empty, Empty, repeat, Repeat};
 
 pub mod prelude;
-#[cfg(feature="alloc")]
 mod buffered;
 mod cursor;
 mod error;
@@ -296,10 +290,8 @@ mod util;
 
 const DEFAULT_BUF_SIZE: usize = 8 * 1024;
 
-#[cfg(feature="alloc")]
 struct Guard<'a> { buf: &'a mut Vec<u8>, len: usize }
 
-#[cfg(feature="alloc")]
 impl<'a> Drop for Guard<'a> {
     fn drop(&mut self) {
         unsafe { self.buf.set_len(self.len); }
@@ -324,7 +316,6 @@ impl<'a> Drop for Guard<'a> {
 // 2. We're passing a raw buffer to the function `f`, and it is expected that
 //    the function only *appends* bytes to the buffer. We'll get undefined
 //    behavior if existing bytes are overwritten to have non-UTF-8 data.
-#[cfg(feature="alloc")]
 fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>
     where F: FnOnce(&mut Vec<u8>) -> Result<usize>
 {
@@ -352,12 +343,10 @@ fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>
 //
 // Because we're extending the buffer with uninitialized data for trusted
 // readers, we need to make sure to truncate that if any of this panics.
-#[cfg(feature="alloc")]
 fn read_to_end<R: Read + ?Sized>(r: &mut R, buf: &mut Vec<u8>) -> Result<usize> {
     read_to_end_with_reservation(r, buf, 32)
 }
 
-#[cfg(feature="alloc")]
 fn read_to_end_with_reservation<R: Read + ?Sized>(r: &mut R,
                                                   buf: &mut Vec<u8>,
                                                   reservation_size: usize) -> Result<usize>
@@ -596,7 +585,6 @@ pub trait Read {
     /// file.)
     ///
     /// [`std::fs::read`]: ../fs/fn.read.html
-    #[cfg(feature="alloc")]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
         read_to_end(self, buf)
     }
@@ -639,7 +627,6 @@ pub trait Read {
     /// reading from a file.)
     ///
     /// [`std::fs::read_to_string`]: ../fs/fn.read_to_string.html
-    #[cfg(feature="alloc")]
     fn read_to_string(&mut self, buf: &mut String) -> Result<usize> {
         // Note that we do *not* call `.read_to_end()` here. We are passing
         // `&mut Vec<u8>` (the raw contents of `buf`) into the `read_to_end`
@@ -1219,7 +1206,6 @@ pub enum SeekFrom {
     Current(i64),
 }
 
-#[cfg(feature="alloc")]
 fn read_until<R: BufRead + ?Sized>(r: &mut R, delim: u8, buf: &mut Vec<u8>)
                                    -> Result<usize> {
     let mut read = 0;
@@ -1299,7 +1285,6 @@ fn read_until<R: BufRead + ?Sized>(r: &mut R, delim: u8, buf: &mut Vec<u8>)
 /// }
 /// ```
 ///
-#[cfg(feature="alloc")]
 pub trait BufRead: Read {
     /// Returns the contents of the internal buffer, filling it with more data
     /// from the inner reader if it is empty.
@@ -1676,7 +1661,6 @@ impl<T: Read, U: Read> Read for Chain<T, U> {
     }
 }
 
-#[cfg(feature="alloc")]
 impl<T: BufRead, U: BufRead> BufRead for Chain<T, U> {
     fn fill_buf(&mut self) -> Result<&[u8]> {
         if !self.done_first {
@@ -1860,7 +1844,6 @@ impl<T: Read> Read for Take<T> {
         self.inner.initializer()
     }
 
-    #[cfg(feature="alloc")]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
         let reservation_size = cmp::min(self.limit, 32) as usize;
 
@@ -1868,7 +1851,6 @@ impl<T: Read> Read for Take<T> {
     }
 }
 
-#[cfg(feature="alloc")]
 impl<T: BufRead> BufRead for Take<T> {
     fn fill_buf(&mut self) -> Result<&[u8]> {
         // Don't call into inner reader at all at EOF because it may still block
@@ -1927,14 +1909,12 @@ impl<R: Read> Iterator for Bytes<R> {
 /// `BufRead`. Please see the documentation of `split()` for more details.
 ///
 /// [split]: trait.BufRead.html#method.split
-#[cfg(feature="alloc")]
 #[derive(Debug)]
 pub struct Split<B> {
     buf: B,
     delim: u8,
 }
 
-#[cfg(feature="alloc")]
 impl<B: BufRead> Iterator for Split<B> {
     type Item = Result<Vec<u8>>;
 
@@ -1959,13 +1939,11 @@ impl<B: BufRead> Iterator for Split<B> {
 /// `BufRead`. Please see the documentation of `lines()` for more details.
 ///
 /// [lines]: trait.BufRead.html#method.lines
-#[cfg(feature="alloc")]
 #[derive(Debug)]
 pub struct Lines<B> {
     buf: B,
 }
 
-#[cfg(feature="alloc")]
 impl<B: BufRead> Iterator for Lines<B> {
     type Item = Result<String>;
 

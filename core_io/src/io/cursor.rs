@@ -10,7 +10,7 @@
 
 use io::prelude::*;
 
-#[cfg(feature="alloc")]
+use alloc::boxed::Box;
 use core::convert::TryInto;
 use core::cmp;
 use io::{self, Initializer, SeekFrom, Error, ErrorKind};
@@ -218,14 +218,14 @@ impl<T> io::Seek for Cursor<T> where T: AsRef<[u8]> {
 
 impl<T> Read for Cursor<T> where T: AsRef<[u8]> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        let n = Read::read(&mut self.get_buf()?, buf)?;
+        let n = Read::read(&mut self.fill_buf()?, buf)?;
         self.pos += n as u64;
         Ok(n)
     }
 
     fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
         let n = buf.len();
-        Read::read_exact(&mut self.get_buf()?, buf)?;
+        Read::read_exact(&mut self.fill_buf()?, buf)?;
         self.pos += n as u64;
         Ok(())
     }
@@ -236,16 +236,11 @@ impl<T> Read for Cursor<T> where T: AsRef<[u8]> {
     }
 }
 
-impl<T> Cursor<T> where T: AsRef<[u8]> {
-    fn get_buf(&mut self) -> io::Result<&[u8]> {
+impl<T> BufRead for Cursor<T> where T: AsRef<[u8]> {
+    fn fill_buf(&mut self) -> io::Result<&[u8]> {
         let amt = cmp::min(self.pos, self.inner.as_ref().len() as u64);
         Ok(&self.inner.as_ref()[(amt as usize)..])
     }
-}
-
-#[cfg(feature="alloc")]
-impl<T> BufRead for Cursor<T> where T: AsRef<[u8]> {
-    fn fill_buf(&mut self) -> io::Result<&[u8]> { self.get_buf() }
     fn consume(&mut self, amt: usize) { self.pos += amt as u64; }
 }
 
@@ -258,7 +253,6 @@ fn slice_write(pos_mut: &mut u64, slice: &mut [u8], buf: &[u8]) -> io::Result<us
 }
 
 // Resizing write implementation
-#[cfg(feature="alloc")]
 fn vec_write(pos_mut: &mut u64, vec: &mut Vec<u8>, buf: &[u8]) -> io::Result<usize> {
     let pos: usize = (*pos_mut).try_into().map_err(|_| {
         Error::new(ErrorKind::InvalidInput,
@@ -293,7 +287,6 @@ impl<'a> Write for Cursor<&'a mut [u8]> {
     fn flush(&mut self) -> io::Result<()> { Ok(()) }
 }
 
-#[cfg(feature="alloc")]
 impl<'a> Write for Cursor<&'a mut Vec<u8>> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         vec_write(&mut self.pos, self.inner, buf)
@@ -301,7 +294,6 @@ impl<'a> Write for Cursor<&'a mut Vec<u8>> {
     fn flush(&mut self) -> io::Result<()> { Ok(()) }
 }
 
-#[cfg(feature="alloc")]
 impl Write for Cursor<Vec<u8>> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         vec_write(&mut self.pos, &mut self.inner, buf)
@@ -309,8 +301,7 @@ impl Write for Cursor<Vec<u8>> {
     fn flush(&mut self) -> io::Result<()> { Ok(()) }
 }
 
-#[cfg(feature="alloc")]
-impl Write for Cursor<::alloc::boxed::Box<[u8]>> {
+impl Write for Cursor<Box<[u8]>> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         slice_write(&mut self.pos, &mut self.inner, buf)

@@ -19,7 +19,7 @@
 //! ```
 
 pub use super::{Read, Write, Seek};
-#[cfg(feature="alloc")] pub use super::BufRead;
+pub use super::BufRead;
 
-#[cfg(feature="alloc")] pub use alloc::boxed::Box;
-#[cfg(feature="alloc")] pub use alloc::vec::Vec;
+pub use alloc::boxed::Box;
+pub use alloc::vec::Vec;

@@ -8,14 +8,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[cfg(feature="alloc")] use alloc::boxed::Box;
-#[cfg(not(feature="alloc"))] use ::FakeBox as Box;
+use alloc::boxed::Box;
 use core::fmt;
 use core::marker::{Send, Sync};
 use core::option::Option::{self, Some, None};
 use core::result;
-#[cfg(feature="alloc")] use alloc::string::String;
-#[cfg(not(feature="alloc"))] use ::ErrorString as String;
+use alloc::string::String;
 use core::convert::From;
 
 /// A specialized [`Result`](../result/enum.Result.html) type for I/O
@@ -78,10 +76,7 @@ impl fmt::Debug for Error {
 enum Repr {
     Os(i32),
     Simple(ErrorKind),
-    #[cfg(feature = "alloc")]
     Custom(Box<Custom>),
-    #[cfg(not(feature = "alloc"))]
-    Custom(Custom),
 }
 
 #[derive(Debug)]

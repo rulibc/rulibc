@@ -377,7 +377,7 @@ impl<R: Seek> Seek for BufReader<R> {
 /// [`flush`]: #method.flush
 pub struct BufWriter<W: Write> {
     inner: Option<W>,
-    pub /* relibc */ buf: Vec<u8>,
+    buf: Vec<u8>,
     // #30888: If the inner writer panics in a call to write, we don't want to
     // write the buffered data a second time in BufWriter's destructor. This
     // flag tells the Drop impl if it should skip the flush.
@@ -473,10 +473,6 @@ impl<W: Write> BufWriter<W> {
             self.buf.drain(..written);
         }
         ret
-    }
-
-    pub fn purge_buf(&mut self) {
-        self.buf = vec![];
     }
 
     /// Gets a reference to the underlying writer.
@@ -723,7 +719,7 @@ impl<W> fmt::Display for IntoInnerError<W> {
 /// }
 /// ```
 pub struct LineWriter<W: Write> {
-    pub /* relibc */ inner: BufWriter<W>,
+    inner: BufWriter<W>,
     need_flush: bool,
 }
 
@@ -809,6 +805,10 @@ impl<W: Write> LineWriter<W> {
     /// ```
     pub fn get_mut(&mut self) -> &mut W { self.inner.get_mut() }
 
+    pub fn buffer(&self) -> &Vec<u8> {
+        self.inner.buf.as_ref()
+    }
+
     /// Unwraps this `LineWriter`, returning the underlying writer.
     ///
     /// The internal buffer is written out before returning the writer.
@@ -839,11 +839,6 @@ impl<W: Write> LineWriter<W> {
                 need_flush: false,
             }, e)
         })
-    }
-
-    pub fn purge(&mut self) {
-        self.inner.purge_buf();
-        self.need_flush = false;
     }
 }
 
