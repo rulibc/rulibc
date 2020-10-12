@@ -143,6 +143,15 @@ impl Write for FILE {
             }
         }
     }
+    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        match self.writer.write_vectored(bufs) {
+            Ok(n) => Ok(n),
+            Err(err) => {
+                self.flags |= F_ERR;
+                Err(err)
+            }
+        }
+    }
     fn flush(&mut self) -> io::Result<()> {
         match self.writer.flush() {
             Ok(()) => Ok(()),
@@ -886,11 +895,8 @@ pub unsafe extern "C" fn puts(s: *const c_char) -> c_int {
     }
 
     let buf = slice::from_raw_parts(s as *mut u8, strlen(s));
-
-    if stream.write_all(&buf).is_err() {
-        return -1;
-    }
-    if stream.write(&[b'\n']).is_err() {
+    let bufs = &mut [io::IoSlice::new(buf), io::IoSlice::new(&[b'\n'])];
+    if stream.write_all_vectored(bufs).is_err() {
         return -1;
     }
     0
