@@ -347,7 +347,7 @@ const exceptions: [[c_uchar; 2]; 200] = [
     [198, 218],
 ];
 
-pub fn casemap(mut c: u32, dir: i32) -> wint_t {
+pub fn casemap(mut c: u32, dir: i32) -> u32 {
     if c >= 0x20000 {
         return c;
     }
