@@ -376,8 +376,8 @@ pub unsafe extern "C" fn wcsncat(
 #[no_mangle]
 pub unsafe extern "C" fn wcsncmp(ws1: *const wchar_t, ws2: *const wchar_t, n: size_t) -> c_int {
     for i in 0..n {
-        let wc1 = *ws1.add(i);
-        let wc2 = *ws2.add(i);
+        let wc1 = *ws1.add(i) as c_int;
+        let wc2 = *ws2.add(i) as c_int;
         if wc1 != wc2 {
             return wc1 - wc2;
         } else if wc1 == 0 {
@@ -481,7 +481,7 @@ pub unsafe extern "C" fn wcsstr(ws1: *const wchar_t, ws2: *const wchar_t) -> *mu
 
 macro_rules! skipws {
     ($ptr:expr) => {
-        while isspace(*$ptr) != 0 {
+        while isspace(*$ptr as c_int) != 0 {
             $ptr = $ptr.add(1);
         }
     };
@@ -674,8 +674,8 @@ pub unsafe extern "C" fn wmemchr(ws: *const wchar_t, wc: wchar_t, n: size_t) -> 
 #[no_mangle]
 pub unsafe extern "C" fn wmemcmp(ws1: *const wchar_t, ws2: *const wchar_t, n: size_t) -> c_int {
     for i in 0..n {
-        let wc1 = *ws1.add(i);
-        let wc2 = *ws2.add(i);
+        let wc1 = *ws1.add(i) as c_int;
+        let wc2 = *ws2.add(i) as c_int;
         if wc1 != wc2 {
             return wc1 - wc2;
         }

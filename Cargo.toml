@@ -10,13 +10,14 @@ crate-type = ["staticlib"]
 
 [workspace]
 members = ["src/crt0", "src/crti", "src/crtn", "src/ld_so"]
-exclude = ["core_io"]
+exclude = ["core_io", "platform_types"]
 
 [build-dependencies]
 cbindgen = "0.13.2"
 cc = "1.0.25"
 
 [dependencies]
+platform_types = { path = "platform_types" }
 cbitset = "0.1.0"
 core_io = { path = "core_io", features = ["collections"] }
 lazy_static = { version = "1.2.0", features = ["nightly", "spin_no_std"] }
