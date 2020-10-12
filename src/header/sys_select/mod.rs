@@ -20,7 +20,7 @@ use crate::{
 // fd_set is also defined in C because cbindgen is incompatible with mem::size_of booo
 
 pub const FD_SETSIZE: usize = 1024;
-type bitset = BitSet<[c_ulong; FD_SETSIZE / (8 * mem::size_of::<c_ulong>())]>;
+type bitset = BitSet<[uint64_t; FD_SETSIZE / (8 * mem::size_of::<uint64_t>())]>;
 
 #[repr(C)]
 pub struct fd_set {
