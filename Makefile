@@ -4,11 +4,16 @@ CARGO?=cargo
 CARGO_TEST?=$(CARGO)
 CARGOFLAGS?=
 RUSTCFLAGS?=
+DEBUG?=release
 
 # When using xargo, build it in local location
 export XARGO_HOME=$(CURDIR)/target/xargo
 
 export OBJCOPY=objcopy
+
+ifneq ("$(DEBUG)","release")
+	DEBUG=debug
+endif
 
 BUILD=target
 ifneq ($(TARGET),)
@@ -75,22 +80,22 @@ install-headers: libs
 	cp -v "pthreads-emb/"*.h "$(DESTDIR)/include"
 
 libs: \
-	$(BUILD)/release/libc.a \
-	$(BUILD)/release/libc.so \
-	$(BUILD)/release/crt0.o \
-	$(BUILD)/release/crti.o \
-	$(BUILD)/release/crtn.o \
-	$(BUILD)/release/ld_so
+	$(BUILD)/$(DEBUG)/libc.a \
+	$(BUILD)/$(DEBUG)/libc.so \
+	$(BUILD)/$(DEBUG)/crt0.o \
+	$(BUILD)/$(DEBUG)/crti.o \
+	$(BUILD)/$(DEBUG)/crtn.o \
+	$(BUILD)/$(DEBUG)/ld_so
 
 install-libs: libs
 	mkdir -pv "$(DESTDIR)/lib"
-	cp -v "$(BUILD)/release/libc.a" "$(DESTDIR)/lib"
-	cp -v "$(BUILD)/release/libc.so" "$(DESTDIR)/lib"
+	cp -v "$(BUILD)/$(DEBUG)/libc.a" "$(DESTDIR)/lib"
+	cp -v "$(BUILD)/$(DEBUG)/libc.so" "$(DESTDIR)/lib"
 	ln -frsv "$(DESTDIR)/lib/libc.so" "$(DESTDIR)/lib/libc.so.6"
-	cp -v "$(BUILD)/release/crt0.o" "$(DESTDIR)/lib"
-	cp -v "$(BUILD)/release/crti.o" "$(DESTDIR)/lib"
-	cp -v "$(BUILD)/release/crtn.o" "$(DESTDIR)/lib"
-	cp -v "$(BUILD)/release/ld_so" "$(DESTDIR)/lib/ld64.so.1"
+	cp -v "$(BUILD)/$(DEBUG)/crt0.o" "$(DESTDIR)/lib"
+	cp -v "$(BUILD)/$(DEBUG)/crti.o" "$(DESTDIR)/lib"
+	cp -v "$(BUILD)/$(DEBUG)/crtn.o" "$(DESTDIR)/lib"
+	cp -v "$(BUILD)/$(DEBUG)/ld_so" "$(DESTDIR)/lib/ld64.so.1"
 	cp -v "$(BUILD)/openlibm/libopenlibm.a" "$(DESTDIR)/lib/libm.a"
 	cp -v "$(BUILD)/pthreads-emb/libpthread.a" "$(DESTDIR)/lib/libpthread.a"
 
