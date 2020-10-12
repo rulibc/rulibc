@@ -7,6 +7,7 @@ use crate::{
     io,
     platform::{types::*, Pal, Sys},
 };
+use alloc::vec::Vec;
 use core::ops::Deref;
 
 pub struct File {
@@ -87,6 +88,18 @@ impl io::Write for &File {
         }
     }
 
+    fn is_write_vectored(&self) -> bool {
+        return true;
+    }
+
+    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        let mut bufs_new = Vec::<&[u8]>::with_capacity(bufs.len());
+        for i in 0..bufs.len() {
+            bufs_new.push(&*bufs[i]);
+        }
+        self.write(&bufs_new.concat())
+    }
+
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
@@ -116,6 +129,14 @@ impl io::Read for File {
 impl io::Write for File {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         (&mut &*self).write(buf)
+    }
+
+    fn is_write_vectored(&self) -> bool {
+        (&mut &*self).is_write_vectored()
+    }
+
+    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        (&mut &*self).write_vectored(bufs)
     }
 
     fn flush(&mut self) -> io::Result<()> {
