@@ -32,3 +32,8 @@ The motivation for this project is:
  use `git fetch --force` to sync with the main branch.
  The release branch will keep stable
 
+## Developing
+```
+cargo install --force cargo-make
+cargo make
+```

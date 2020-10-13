@@ -1,0 +1,86 @@
+[config]
+default_to_workspace = false
+default_task_name = "build"
+
+[env]
+COMMON = "COMMON"
+PROFILE_NAME = "${CARGO_MAKE_PROFILE}"
+LIBRARY_EXTENSION = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "so", mapping = {"linux" = "so", "macos" = "dylib", "windows" = "dll", "openbsd" = "so" } }
+STAIC_LIBRARY_EXTENSION = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "a", mapping = {"linux" = "a", "macos" = "a", "windows" = "lib", "openbsd" = "a" } }
+LIBRARY_PREFIX = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "lib", mapping = {"windows" = ""} }
+BUILD_TYPE = { source = "${CARGO_MAKE_PROFILE}", default_value = "debug", mapping = {"production" = "release"} }
+BUILD_TYPE_CARGO_ARG = { source = "${CARGO_MAKE_PROFILE}", default_value = "--target=${CARGO_MAKE_RUST_TARGET_TRIPLE}", mapping = {"production" = "--target=${CARGO_MAKE_RUST_TARGET_TRIPLE} --release"} }
+TARGET_DIST_DIR = "target/dist/${CARGO_MAKE_RUST_TARGET_TRIPLE}-${BUILD_TYPE}"
+CARGO_INCREMENTAL = 0
+RUST_BACKTRACE = 1
+
+[env.development]
+IS_DEV = true
+IS_PROD = false
+
+[env.production]
+IS_DEV = false
+IS_PROD = true
+
+[tasks.echo]
+workspace=false
+script_runner = "@shell"
+script = [
+'''
+echo COMMON: ${COMMON}
+echo PROFILE_NAME: ${PROFILE_NAME}
+echo IS_DEV: ${IS_DEV}
+echo IS_PROD: ${IS_PROD}
+'''
+]
+
+[tasks.format]
+disabled = true
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clean]
+disabled = true
+command = "cargo"
+args = ["clean"]
+
+[tasks.test]
+workspace=false
+disabled = true
+
+[tasks.build]
+command = "rustc"
+args = ["--version"]
+dependencies = ["crt", "rulibc_make", "run_test"]
+
+[tasks.crt]
+workspace=false
+script_runner = "@shell"
+script = [
+'''
+mkdir -p "${TARGET_DIST_DIR}/lib"
+cargo rustc ${BUILD_TYPE_CARGO_ARG} --manifest-path src/crt0/Cargo.toml ${CARGOFLAGS} -- --emit obj=${TARGET_DIST_DIR}/lib/${LIB_PREFIX}crt0.o -C panic=abort ${RUSTCFLAGS}
+cargo rustc ${BUILD_TYPE_CARGO_ARG} --manifest-path src/crti/Cargo.toml ${CARGOFLAGS} -- --emit obj=${TARGET_DIST_DIR}/lib/${LIB_PREFIX}crti.o -C panic=abort ${RUSTCFLAGS}
+cargo rustc ${BUILD_TYPE_CARGO_ARG} --manifest-path src/crtn/Cargo.toml ${CARGOFLAGS} -- --emit obj=${TARGET_DIST_DIR}/lib/${LIB_PREFIX}crtn.o -C panic=abort ${RUSTCFLAGS}
+'''
+]
+
+[tasks.rulibc_make]
+workspace=false
+script_runner = "@shell"
+script = [
+'''
+cargo build ${BUILD_TYPE_CARGO_ARG} ${CARGOFLAGS} -- ${RUSTCFLAGS}
+'''
+]
+
+[tasks.run_test]
+script_runner = "@shell"
+script = [
+'''
+cd tests
+cargo clean
+cargo build ${BUILD_TYPE_CARGO_ARG}
+'''
+]
