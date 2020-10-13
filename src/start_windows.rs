@@ -1,5 +1,7 @@
 use alloc::vec::Vec;
 use core::{intrinsics};
+use core::ptr::null_mut;
+use winapi::um::winuser::{MB_OK, MessageBoxW};
 
 use crate::{
     header::{stdio, stdlib},
@@ -49,8 +51,16 @@ pub unsafe extern "C" fn relibc_start(argc: isize) -> ! {
     unreachable!();
 }
 
+fn print_message(msg: &str) {
+    let wide: Vec<u16> = msg.encode_utf16().collect();
+    let ret = unsafe {
+        MessageBoxW(null_mut(), wide.as_ptr(), wide.as_ptr(), MB_OK)
+    };
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn mainCRTStartup() -> ! {
+    print_message("Hello, the world");
     unreachable!();
 }
 
