@@ -2,8 +2,8 @@
 
 use crate::{header::sys_socket::sa_family_t, platform::types::*};
 
-pub type in_addr_t = u32;
-pub type in_port_t = u16;
+pub type in_addr_t = uint32_t;
+pub type in_port_t = uint16_t;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Default)]
@@ -53,8 +53,8 @@ pub const IPPROTO_IPV6: u8 = 0x29;
 pub const IPPROTO_RAW: u8 = 0xff;
 pub const IPPROTO_MAX: u8 = 0xff;
 
-pub const INADDR_ANY: u32 = 0; // Can't use in_addr_t alias because cbindgen :(
-pub const INADDR_BROADCAST: u32 = 0xFFFF_FFFF; // Can't use core::u32::MAX because cbindgen :(
+pub const INADDR_ANY: in_addr_t = 0; // Can't use in_addr_t alias because cbindgen :(
+pub const INADDR_BROADCAST: u32 = u32::MAX;
 pub const INADDR_NONE: u32 = 0xFFFF_FFFF;
 pub const INADDR_LOOPBACK: u32 = 0x7F00_0001;
 
