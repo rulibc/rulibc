@@ -1,0 +1,18 @@
+[package]
+name = "librulibc_tests"
+version = "0.1.1"
+authors = ["Yonggang Luo <luoyonggang@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = """
+Tests for rulibc
+"""
+repository = "https://github.com/rulibc/rulibc"
+keywords = ["core", "no_std", "io", "read", "write"]
+include = [
+	"Cargo.toml",
+	"LICENSE-*",
+	"src/**/*.rs",
+]
+[build-dependencies]
+cc = "1.0"
+encoding = "0.2"
