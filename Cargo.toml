@@ -13,7 +13,7 @@ members = ["src/crt0", "src/crti", "src/crtn", "src/ld_so"]
 exclude = ["core_io", "platform_types"]
 
 [build-dependencies]
-cbindgen = "0.13.2"
+cbindgen = "0.15"
 cc = "1.0.25"
 
 [dependencies]
