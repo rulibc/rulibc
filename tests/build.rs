@@ -37,7 +37,7 @@ fn generate_bindings(cbindgen_config_path: &Path) {
         .expect("Unable to generate bindings")
         .write_to_file(header_path);
     } else {
-        panic!("{}", header_path_str);
+        // panic!("{}", header_path_str);
     }
 }
 
