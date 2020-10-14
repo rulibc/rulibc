@@ -1,10 +1,10 @@
-use crate::io::{self, Write};
+use alloc::io::{self, Write};
 use alloc::{
     collections::BTreeMap,
     string::{String, ToString},
     vec::Vec,
 };
-use core::{char, cmp, f64, ffi::VaList, fmt, num::FpCategory, ops::Range, slice};
+use core::{char, cmp, f64, fmt, num::FpCategory, ops::Range, slice};
 
 use crate::{
     header::errno::EILSEQ,
@@ -52,7 +52,7 @@ enum Number {
     Next,
 }
 impl Number {
-    unsafe fn resolve(self, varargs: &mut VaListCache, ap: &mut VaList) -> usize {
+    unsafe fn resolve(self, varargs: &mut VaListCache, ap: &mut va_list<'_, '_>) -> usize {
         let arg = match self {
             Number::Static(num) => return num,
             Number::Index(i) => varargs.get(i - 1, ap, None),
@@ -92,7 +92,7 @@ enum VaArg {
     wint_t(wint_t),
 }
 impl VaArg {
-    unsafe fn arg_from(fmtkind: FmtKind, intkind: IntKind, ap: &mut VaList) -> VaArg {
+    unsafe fn arg_from(fmtkind: FmtKind, intkind: IntKind, ap: &mut va_list<'_, '_>) -> VaArg {
         // Per the C standard using va_arg with a type with a size
         // less than that of an int for integers and double for floats
         // is invalid. As a result any arguments smaller than an int or
@@ -227,7 +227,7 @@ impl VaListCache {
     unsafe fn get(
         &mut self,
         i: usize,
-        ap: &mut VaList,
+        ap: &mut va_list<'_, '_>,
         default: Option<(FmtKind, IntKind)>,
     ) -> VaArg {
         if let Some(&arg) = self.args.get(i) {
@@ -608,7 +608,7 @@ impl Iterator for PrintfIter {
     }
 }
 
-unsafe fn inner_printf<W: Write>(w: W, format: *const c_char, mut ap: VaList) -> io::Result<c_int> {
+unsafe fn inner_printf<W: Write>(w: W, format: *const c_char, mut ap: va_list<'_, '_>) -> io::Result<c_int> {
     let w = &mut platform::CountingWriter::new(w);
 
     let iterator = PrintfIter {
@@ -887,7 +887,7 @@ unsafe fn inner_printf<W: Write>(w: W, format: *const c_char, mut ap: VaList) ->
                                 Some(c) => c,
                                 None => {
                                     platform::errno = EILSEQ;
-                                    return Err(io::last_os_error());
+                                    return Err(super::io::last_os_error());
                                 }
                             };
                             if string.len() + c.len_utf8() >= max {
@@ -923,7 +923,7 @@ unsafe fn inner_printf<W: Write>(w: W, format: *const c_char, mut ap: VaList) ->
                         Some(c) => c,
                         None => {
                             platform::errno = EILSEQ;
-                            return Err(io::last_os_error());
+                            return Err(super::io::last_os_error());
                         }
                     };
                     let mut buf = [0; 4];
@@ -981,6 +981,6 @@ unsafe fn inner_printf<W: Write>(w: W, format: *const c_char, mut ap: VaList) ->
     Ok(w.written as c_int)
 }
 
-pub unsafe fn printf<W: Write>(w: W, format: *const c_char, ap: VaList) -> c_int {
+pub unsafe fn printf<W: Write>(w: W, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     inner_printf(w, format, ap).unwrap_or(-1)
 }

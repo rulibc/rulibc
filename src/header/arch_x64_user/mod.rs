@@ -70,14 +70,3 @@ pub struct user {
     pub u_comm: [c_char; 32],
     pub u_debugreg: [c_ulong; 8],
 }
-
-#[no_mangle]
-pub extern "C" fn _cbindgen_only_generates_structs_if_they_are_mentioned_which_is_dumb_x86_user(
-    a: user_fpregs_struct,
-    b: user_regs_struct,
-    c: user,
-    d: elf_gregset_t,
-    e: elf_greg_t,
-    f: elf_fpregset_t,
-) {
-}

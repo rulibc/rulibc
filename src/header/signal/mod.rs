@@ -50,6 +50,8 @@ pub type sigset_t = c_ulong;
 
 pub type stack_t = sigaltstack;
 
+pub type sighandler_t = unsafe extern "C" fn(c_int);
+
 #[no_mangle]
 pub extern "C" fn kill(pid: pid_t, sig: c_int) -> c_int {
     Sys::kill(pid, sig)
@@ -232,7 +234,7 @@ pub extern "C" fn sigrelse(sig: c_int) -> c_int {
 }
 
 // #[no_mangle]
-pub extern "C" fn sigset(sig: c_int, func: fn(c_int)) -> fn(c_int) {
+pub extern "C" fn sigset(sig: c_int, func: sighandler_t) -> sighandler_t {
     unimplemented!();
 }
 

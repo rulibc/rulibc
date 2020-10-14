@@ -1,6 +1,6 @@
 //! wchar implementation for Redox, following http://pubs.opengroup.org/onlinepubs/7908799/xsh/wchar.h.html
 
-use core::{char, ffi::VaList as va_list, mem, ptr, slice, usize};
+use core::{char, mem, ptr, slice, usize};
 
 use crate::{
     header::{
@@ -227,13 +227,13 @@ pub extern "C" fn swprintf(
     s: *mut wchar_t,
     n: size_t,
     format: *const wchar_t,
-    ap: va_list,
+    ap: va_list<'_, '_>,
 ) -> c_int {
     unimplemented!();
 }
 
 // #[no_mangle]
-pub extern "C" fn swscanf(s: *const wchar_t, format: *const wchar_t, ap: va_list) -> c_int {
+pub extern "C" fn swscanf(s: *const wchar_t, format: *const wchar_t, ap: va_list<'_, '_>) -> c_int {
     unimplemented!();
 }
 
@@ -243,12 +243,12 @@ pub extern "C" fn ungetwc(wc: wint_t, stream: *mut FILE) -> wint_t {
 }
 
 // #[no_mangle]
-pub extern "C" fn vfwprintf(stream: *mut FILE, format: *const wchar_t, arg: va_list) -> c_int {
+pub extern "C" fn vfwprintf(stream: *mut FILE, format: *const wchar_t, arg: va_list<'_, '_>) -> c_int {
     unimplemented!();
 }
 
 // #[no_mangle]
-pub extern "C" fn vwprintf(format: *const wchar_t, arg: va_list) -> c_int {
+pub extern "C" fn vwprintf(format: *const wchar_t, arg: va_list<'_, '_>) -> c_int {
     unimplemented!();
 }
 
@@ -257,7 +257,7 @@ pub extern "C" fn vswprintf(
     s: *mut wchar_t,
     n: size_t,
     format: *const wchar_t,
-    arg: va_list,
+    arg: va_list<'_, '_>,
 ) -> c_int {
     unimplemented!();
 }
@@ -718,12 +718,12 @@ pub unsafe extern "C" fn wmemset(ws: *mut wchar_t, wc: wchar_t, n: size_t) -> *m
 }
 
 // #[no_mangle]
-pub extern "C" fn wprintf(format: *const wchar_t, ap: va_list) -> c_int {
+pub extern "C" fn wprintf(format: *const wchar_t, ap: va_list<'_, '_>) -> c_int {
     unimplemented!();
 }
 
 // #[no_mangle]
-pub extern "C" fn wscanf(format: *const wchar_t, ap: va_list) -> c_int {
+pub extern "C" fn wscanf(format: *const wchar_t, ap: va_list<'_, '_>) -> c_int {
     unimplemented!();
 }
 
