@@ -17,6 +17,8 @@
 #![feature(maybe_uninit_extra)]
 #![feature(stmt_expr_attributes)]
 #![feature(str_internals)]
+#![feature(write_all_vectored)]
+#![feature(can_vector)]
 #![feature(thread_local)]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::cast_ptr_alignment)]
@@ -26,17 +28,10 @@
 
 #[macro_use]
 extern crate alloc;
-extern crate cbitset;
-extern crate core_io;
 #[cfg(not(target_os = "windows"))]
 extern crate goblin;
 #[macro_use]
 extern crate lazy_static;
-extern crate memchr;
-#[macro_use]
-extern crate memoffset;
-extern crate posix_regex;
-extern crate rand;
 
 #[cfg(target_os = "linux")]
 #[macro_use]
@@ -72,7 +67,7 @@ use crate::platform::{Allocator, Pal, Sys, NEWALLOCATOR};
 static ALLOCATOR: Allocator = NEWALLOCATOR;
 
 #[no_mangle]
-pub extern "C" fn rulibc_panic(pi: &::core::panic::PanicInfo) -> ! {
+pub extern "C" fn rulibc_panic(pi: &::core::panic::PanicInfo<'_>) -> ! {
     use core::fmt::Write;
 
     let mut w = platform::FileWriter(2);
@@ -85,7 +80,7 @@ pub extern "C" fn rulibc_panic(pi: &::core::panic::PanicInfo) -> ! {
 #[panic_handler]
 #[linkage = "weak"]
 #[no_mangle]
-pub extern "C" fn rust_begin_unwind(pi: &::core::panic::PanicInfo) -> ! {
+pub extern "C" fn rust_begin_unwind(pi: &::core::panic::PanicInfo<'_>) -> ! {
     rulibc_panic(pi)
 }
 

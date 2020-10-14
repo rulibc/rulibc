@@ -1,6 +1,6 @@
 use super::{
     super::{types::*, PalPtrace},
-    e, Sys,
+    Sys,
 };
 
 impl PalPtrace for Sys {

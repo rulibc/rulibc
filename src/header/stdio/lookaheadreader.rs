@@ -1,5 +1,5 @@
 use super::{fseek_locked, ftell_locked, FILE, SEEK_SET};
-use crate::core_io::Read;
+use alloc::io::Read;
 struct LookAheadBuffer {
     buf: *const u8,
     pos: isize,
@@ -83,7 +83,7 @@ impl<'a> LookAheadReader<'a> {
 }
 
 impl<'a> From<&'a mut FILE> for LookAheadReader<'a> {
-    fn from(f: &'a mut FILE) -> LookAheadReader {
+    fn from(f: &'a mut FILE) -> LookAheadReader<'_> {
         LookAheadReader(LookAheadReaderEnum::FILE(f.into()))
     }
 }

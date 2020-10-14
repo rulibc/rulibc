@@ -34,7 +34,7 @@ impl Allocator {
         self.mstate.load(Ordering::Relaxed)
     }
 }
-unsafe impl<'a> GlobalAlloc for Allocator {
+unsafe impl GlobalAlloc for Allocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         alloc_align(layout.size(), layout.align()) as *mut u8
     }

@@ -3,10 +3,11 @@
 use core::{convert::TryFrom, intrinsics, iter, mem, ptr, slice};
 use rand::{
     distributions::{Alphanumeric, Distribution, Uniform},
-    prng::XorShiftRng,
-    rngs::JitterRng,
     Rng, SeedableRng,
 };
+
+use rand_xorshift::{XorShiftRng};
+use rand_jitter::{JitterRng};
 
 use crate::{
     c_str::CStr,

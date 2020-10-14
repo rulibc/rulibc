@@ -1,7 +1,7 @@
 //! dlfcn implementation for Redox, following http://pubs.opengroup.org/onlinepubs/7908799/xsh/dlfcn.h.html
 
 use core::{
-    ptr, str,
+    ptr,
     sync::atomic::{AtomicUsize, Ordering},
 };
 

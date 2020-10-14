@@ -1,10 +1,8 @@
-use core::ptr;
-use core_io::Write;
 
 use super::{errno, types::*, Pal};
 use crate::{
     c_str::CStr,
-    header::{dirent::dirent, signal::SIGCHLD, sys_stat::S_IFIFO},
+    header::{dirent::dirent},
 };
 // use header::sys_resource::rusage;
 use crate::header::{
@@ -91,8 +89,7 @@ impl Pal for Sys {
     }
 
     fn exit(status: c_int) -> ! {
-        unsafe { unimplemented!() }
-        loop {}
+        unimplemented!()
     }
 
     fn fchdir(fildes: c_int) -> c_int {
