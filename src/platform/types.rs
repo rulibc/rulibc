@@ -1,4 +1,4 @@
-pub use platform_types::*;
+pub use core::ctypes::*;
 
 //===================================================================
 // TODO: Not implement yet

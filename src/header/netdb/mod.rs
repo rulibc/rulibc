@@ -391,7 +391,7 @@ pub unsafe extern "C" fn getnetent() -> *mut netent {
     rlb.next();
     N_POS = rlb.line_pos();
 
-    let mut iter: SplitWhitespace = r.split_whitespace();
+    let mut iter: SplitWhitespace<'_> = r.split_whitespace();
 
     let mut net_name = iter.next().unwrap().as_bytes().to_vec();
     net_name.push(b'\0');
@@ -505,7 +505,7 @@ pub unsafe extern "C" fn getprotoent() -> *mut protoent {
     rlb.next();
     P_POS = rlb.line_pos();
 
-    let mut iter: SplitWhitespace = r.split_whitespace();
+    let mut iter: SplitWhitespace<'_> = r.split_whitespace();
 
     let mut proto_name: Vec<u8> = iter.next().unwrap().as_bytes().to_vec();
     proto_name.push(b'\0');

@@ -75,7 +75,7 @@ pub unsafe extern "C" fn gethostent() -> *mut hostent {
     rlb.next();
     H_POS = rlb.line_pos();
 
-    let mut iter: SplitWhitespace = r.split_whitespace();
+    let mut iter: SplitWhitespace<'_> = r.split_whitespace();
 
     let mut addr_vec = iter.next().unwrap().as_bytes().to_vec();
     addr_vec.push(b'\0');
