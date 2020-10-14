@@ -648,7 +648,7 @@ impl ops::Deref for CString {
 }
 
 impl fmt::Debug for CString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&**self, f)
     }
 }
@@ -667,7 +667,7 @@ impl From<CString> for Vec<u8> {
 }
 
 impl fmt::Debug for CStr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "\"")?;
         for byte in self
             .to_bytes()
@@ -851,13 +851,13 @@ impl NulError {
 }
 
 impl fmt::Display for NulError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "nul byte found in provided data at position: {}", self.0)
     }
 }
 
 impl fmt::Display for FromBytesWithNulError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.description())?;
         if let FromBytesWithNulErrorKind::InteriorNul(pos) = self.kind {
             write!(f, " at byte pos {}", pos)?;
@@ -886,7 +886,7 @@ impl IntoStringError {
 }
 
 impl fmt::Display for IntoStringError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.description().fmt(f)
     }
 }
@@ -1169,7 +1169,7 @@ impl CStr {
     ///     Cow::Owned(String::from("Hello �World")) as Cow<str>
     /// );
     /// ```
-    pub fn to_string_lossy(&self) -> Cow<str> {
+    pub fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self.to_bytes())
     }
 

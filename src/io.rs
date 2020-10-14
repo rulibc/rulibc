@@ -1,4 +1,4 @@
-pub use core_io::*;
+pub use alloc::io::*;
 
 use crate::platform;
 
