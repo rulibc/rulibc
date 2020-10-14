@@ -1,6 +1,6 @@
 use super::{
     super::{types::*, PalSocket},
-    e, Sys,
+    Sys,
 };
 use crate::header::sys_socket::{sockaddr, socklen_t};
 

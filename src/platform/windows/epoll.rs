@@ -1,6 +1,6 @@
 use super::{
     super::{types::*, PalEpoll},
-    e, Sys,
+    Sys,
 };
 use crate::header::{signal::sigset_t, sys_epoll::epoll_event};
 
