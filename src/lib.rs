@@ -61,8 +61,6 @@ pub mod start;
 pub mod start_windows;
 pub mod sync;
 
-#[cfg(windows)] extern crate winapi;
-
 use crate::platform::{Allocator, Pal, Sys, NEWALLOCATOR};
 
 #[global_allocator]

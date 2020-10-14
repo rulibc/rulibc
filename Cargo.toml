@@ -32,5 +32,26 @@ winapi = { version = "0.3", features = ["winuser", "rustc-dep-of-std"]}
 [features]
 # Unstable feature to support being a libstd dependency
 rustc-dep-of-std = ["compiler_builtins", "core", "alloc"]
-default = []
+default = ["rustc-dep-of-std"]
 trace = []
+
+[patch.crates-io]
+# See comments in `library/rustc-std-workspace-core/README.md` for what's going on
+# here
+rustc-std-workspace-core = { path = 'deps/rust/library/rustc-std-workspace-core' }
+rustc-std-workspace-alloc = { path = 'deps/rust/library/rustc-std-workspace-alloc' }
+# rustc-std-workspace-std = { path = 'deps/rust/library/rustc-std-workspace-std' }
+
+
+winapi = {path="deps/winapi-rs" }
+num-traits = {path="deps/num-traits"}
+cbitset = {path="deps/cbitset"}
+lazy_static = {path="deps/lazy-static.rs"}
+spin = {path="deps/spin-rs"}
+memchr = {path="deps/rust-memchr"}
+memoffset = {path="deps/memoffset"}
+rand = {path="deps/rand"}
+rand_core = {path="deps/rand/rand_core"}
+libm = {path="deps/libm"}
+rand_xorshift = {path="deps/rngs/rand_xorshift"}
+rand_jitter = {path="deps/rngs/rand_jitter"}
