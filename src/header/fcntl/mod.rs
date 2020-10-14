@@ -55,5 +55,3 @@ pub unsafe extern "C" fn sys_open(path: *const c_char, oflag: c_int, mode: mode_
     Sys::open(path, oflag, mode)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn cbindgen_stupid_struct_user_for_fcntl(a: flock) {}
