@@ -7,12 +7,13 @@ use alloc::{
 };
 use core::{
     cmp,
-    ffi::VaList as va_list,
     fmt::{self, Write as WriteFmt},
     i32, mem,
     ops::{Deref, DerefMut},
     ptr, slice, str,
 };
+
+pub use core::ctypes::va_list;
 
 use crate::{
     c_str::CStr,
@@ -175,7 +176,7 @@ impl WriteByte for FILE {
     }
 }
 impl FILE {
-    pub fn lock(&mut self) -> LockGuard {
+    pub fn lock(&mut self) -> LockGuard<'_> {
         unsafe {
             flockfile(self);
         }
@@ -1079,7 +1080,7 @@ pub unsafe extern "C" fn ungetc(c: c_int, stream: *mut FILE) -> c_int {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vfprintf(file: *mut FILE, format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vfprintf(file: *mut FILE, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     let mut file = (*file).lock();
     if let Err(_) = file.try_set_byte_orientation_unlocked() {
         return -1;
@@ -1089,7 +1090,7 @@ pub unsafe extern "C" fn vfprintf(file: *mut FILE, format: *const c_char, ap: va
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vprintf(format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vprintf(format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     vfprintf(&mut *stdout, format, ap)
 }
 
@@ -1097,7 +1098,7 @@ pub unsafe extern "C" fn vprintf(format: *const c_char, ap: va_list) -> c_int {
 pub unsafe extern "C" fn vasprintf(
     strp: *mut *mut c_char,
     format: *const c_char,
-    ap: va_list,
+    ap: va_list<'_, '_>,
 ) -> c_int {
     let mut alloc_writer = CVec::new();
     let ret = printf::printf(&mut alloc_writer, format, ap);
@@ -1112,7 +1113,7 @@ pub unsafe extern "C" fn vsnprintf(
     s: *mut c_char,
     n: size_t,
     format: *const c_char,
-    ap: va_list,
+    ap: va_list<'_, '_>,
 ) -> c_int {
     printf::printf(
         &mut platform::StringWriter(s as *mut u8, n as usize),
@@ -1122,12 +1123,12 @@ pub unsafe extern "C" fn vsnprintf(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vsprintf(s: *mut c_char, format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vsprintf(s: *mut c_char, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     printf::printf(&mut platform::UnsafeStringWriter(s as *mut u8), format, ap)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vfscanf(file: *mut FILE, format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vfscanf(file: *mut FILE, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     let ret = {
         let mut file = (*file).lock();
         if let Err(_) = file.try_set_byte_orientation_unlocked() {
@@ -1135,19 +1136,19 @@ pub unsafe extern "C" fn vfscanf(file: *mut FILE, format: *const c_char, ap: va_
         }
 
         let f: &mut FILE = &mut *file;
-        let reader: LookAheadReader = f.into();
+        let reader: LookAheadReader<'_> = f.into();
         scanf::scanf(reader, format, ap)
     };
     ret
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vscanf(format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vscanf(format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     vfscanf(&mut *stdin, format, ap)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vsscanf(s: *const c_char, format: *const c_char, ap: va_list) -> c_int {
+pub unsafe extern "C" fn vsscanf(s: *const c_char, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     let reader = (s as *const u8).into();
     scanf::scanf(reader, format, ap)
 }

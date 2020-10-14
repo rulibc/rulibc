@@ -125,7 +125,7 @@ pub extern "C" fn dup2(fildes: c_int, fildes2: c_int) -> c_int {
 }
 
 // #[no_mangle]
-pub extern "C" fn encrypt(block: [c_char; 64], edflag: c_int) {
+pub extern "C" fn encrypt(block: *mut c_char /* char block[64] */, edflag: c_int) {
     unimplemented!();
 }
 
