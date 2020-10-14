@@ -152,6 +152,11 @@ dependencies = [
 [[package]]
 name = "ld_so"
 version = "0.1.0"
+dependencies = [
+ "compiler_builtins",
+ "rustc-std-workspace-alloc",
+ "rustc-std-workspace-core",
+]
 
 [[package]]
 name = "libc"

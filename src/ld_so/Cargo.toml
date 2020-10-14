@@ -6,3 +6,13 @@ authors = ["Jeremy Soller <jackpot51@gmail.com>"]
 [lib]
 name = "ld_so"
 crate-type = ["staticlib"]
+
+[dependencies]
+compiler_builtins = {version = "0.1", optional = true}
+core = {version = "1.0", optional = true, package = "rustc-std-workspace-core"}
+alloc = {version = "1.0", optional = true, package = "rustc-std-workspace-alloc"}
+
+[features]
+# Unstable feature to support being a libstd dependency
+rustc-dep-of-std = ["compiler_builtins", "core", "alloc"]
+default = ["rustc-dep-of-std"]
