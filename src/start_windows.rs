@@ -1,18 +1,16 @@
 use alloc::vec::Vec;
-use core::{intrinsics, ptr};
+use core::{intrinsics};
 
 use crate::{
     header::{stdio, stdlib},
-    platform::{self, new_mspace, types::*, Pal, Sys},
+    platform::{self, new_mspace, types::*},
     ALLOCATOR,
 };
 
 fn alloc_init() {
-    unsafe {
-        /* TODO: how to init alloc on windows properly */
-        if ALLOCATOR.get_book_keeper() == 0 {
-            ALLOCATOR.set_book_keeper(new_mspace());
-        }
+    /* TODO: how to init alloc on windows properly */
+    if ALLOCATOR.get_book_keeper() == 0 {
+        ALLOCATOR.set_book_keeper(new_mspace());
     }
 }
 
