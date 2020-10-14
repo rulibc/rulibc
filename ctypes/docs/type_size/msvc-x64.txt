@@ -1,0 +1,29 @@
+sizeof char:1 is_unsigned:0
+sizeof int:4 is_unsigned:0
+sizeof unsigned int:4 is_unsigned:1
+sizeof long:4 is_unsigned:0
+sizeof unsigned long:4 is_unsigned:1
+sizeof int8_t:1 is_unsigned:0
+sizeof int16_t:2 is_unsigned:0
+sizeof int32_t:4 is_unsigned:0
+sizeof int64_t:8 is_unsigned:0
+sizeof uint8_t:1 is_unsigned:1
+sizeof uint16_t:2 is_unsigned:1
+sizeof uint32_t:4 is_unsigned:1
+sizeof uint64_t:8 is_unsigned:1
+sizeof signed char:1 is_unsigned:0
+sizeof short:2 is_unsigned:0
+sizeof long long:8 is_unsigned:0
+sizeof unsigned char:1 is_unsigned:1
+sizeof unsigned short:2 is_unsigned:1
+sizeof unsigned long long:8 is_unsigned:1
+sizeof intmax_t:8 is_unsigned:0
+sizeof uintmax_t:8 is_unsigned:1
+sizeof size_t:8 is_unsigned:1
+sizeof ptrdiff_t:8 is_unsigned:0
+sizeof intptr_t:8 is_unsigned:0
+sizeof uintptr_t:8 is_unsigned:1
+sizeof wchar_t:2 is_unsigned:1
+sizeof wint_t:2 is_unsigned:1
+sizeof wctype_t:2 is_unsigned:1
+WEOF:65535
