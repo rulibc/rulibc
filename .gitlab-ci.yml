@@ -8,8 +8,8 @@ default:
     before_script:
         - apt-get update -qq
         - apt-get install -qq git
-        - git submodule sync --recursive
-        - git submodule update --init --recursive
+        - git submodule sync
+        - git submodule update --init
 
     cache:
         paths:
