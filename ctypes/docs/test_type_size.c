@@ -54,6 +54,7 @@ int main() {
     PRINT_TYPE_INFO(wctype_t);
 
     printf("WEOF:%lld\n", (long long)WEOF);
+    printf("long double size:%d\n", (int)sizeof(long double));
 
     return 0;
 }
