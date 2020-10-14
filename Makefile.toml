@@ -71,16 +71,16 @@ workspace=false
 script_runner = "@shell"
 script = [
 '''
-cargo build ${BUILD_TYPE_CARGO_ARG} ${CARGOFLAGS} -- ${RUSTCFLAGS}
+cargo build -Z unstable-options ${BUILD_TYPE_CARGO_ARG} ${CARGOFLAGS} --out-dir ${TARGET_DIST_DIR}/lib -- ${RUSTCFLAGS}
 '''
 ]
 
 [tasks.run_test]
+workspace=false
 script_runner = "@shell"
 script = [
 '''
 cd tests
-cargo clean
 cargo build ${BUILD_TYPE_CARGO_ARG}
 '''
 ]

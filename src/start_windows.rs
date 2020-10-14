@@ -27,7 +27,7 @@ fn io_init() {
 
 #[inline(never)]
 #[no_mangle]
-pub unsafe extern "C" fn relibc_start(argc: isize) -> ! {
+pub unsafe extern "C" fn relibc_start() -> ! {
     extern "C" {
         fn main(argc: isize, argv: *mut *mut c_char, envp: *mut *mut c_char) -> c_int;
     }
@@ -37,6 +37,9 @@ pub unsafe extern "C" fn relibc_start(argc: isize) -> ! {
     alloc_init();
     io_init();
 
+    print_message("Hello, the world");
+
+    let argc: isize = 0;
     // Set up argc and argv
     // platform::inner_argv = copy_string_array(argv, argc as usize);
     platform::argv = platform::inner_argv.as_mut_ptr();
@@ -60,7 +63,7 @@ fn print_message(msg: &str) {
 
 #[no_mangle]
 pub unsafe extern "C" fn mainCRTStartup() -> ! {
-    print_message("Hello, the world");
+    relibc_start();
     unreachable!();
 }
 

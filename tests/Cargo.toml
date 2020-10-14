@@ -13,6 +13,10 @@ include = [
 	"LICENSE-*",
 	"src/**/*.rs",
 ]
+
+[workspace]
+
 [build-dependencies]
 cc = "1.0"
 encoding = "0.2"
+cbindgen = "0.15"
