@@ -5,3 +5,4 @@ sysroot/
 .gdb_history
 *.patch
 sysroot.partial/
+/deps/

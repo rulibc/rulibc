@@ -1152,3 +1152,11 @@ pub unsafe extern "C" fn vsscanf(s: *const c_char, format: *const c_char, ap: va
     let reader = (s as *const u8).into();
     scanf::scanf(reader, format, ap)
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn asprintf(
+    strp: *mut *mut c_char,
+    format: *const c_char,
+    mut ap: ...) -> c_int {
+    vasprintf(strp, format, ap.as_va_list())
+}
