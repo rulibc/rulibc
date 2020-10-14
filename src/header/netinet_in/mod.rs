@@ -53,7 +53,7 @@ pub const IPPROTO_IPV6: u8 = 0x29;
 pub const IPPROTO_RAW: u8 = 0xff;
 pub const IPPROTO_MAX: u8 = 0xff;
 
-pub const INADDR_ANY: in_addr_t = 0; // Can't use in_addr_t alias because cbindgen :(
+pub const INADDR_ANY: in_addr_t = 0;
 pub const INADDR_BROADCAST: u32 = u32::MAX;
 pub const INADDR_NONE: u32 = 0xFFFF_FFFF;
 pub const INADDR_LOOPBACK: u32 = 0x7F00_0001;
