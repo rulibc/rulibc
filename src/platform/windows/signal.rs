@@ -1,8 +1,7 @@
-use core::mem;
 
 use super::{
     super::{types::*, PalSignal},
-    e, Sys,
+    Sys,
 };
 use crate::header::{
     signal::{sigaction, sigset_t, stack_t},
