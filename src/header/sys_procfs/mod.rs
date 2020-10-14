@@ -60,14 +60,3 @@ pub type prfpregset_t = elf_fpregset_t;
 pub type lwpid_t = pid_t;
 pub type prstatus_t = elf_prstatus;
 pub type prpsinfo_t = elf_prpsinfo;
-
-#[no_mangle]
-pub extern "C" fn _cbindgen_only_generates_structs_if_they_are_mentioned_which_is_dumb_procfs(
-    a: psaddr_t,
-    b: prgregset_t,
-    c: prfpregset_t,
-    d: lwpid_t,
-    e: prstatus_t,
-    f: prpsinfo_t,
-) {
-}

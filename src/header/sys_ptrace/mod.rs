@@ -1,7 +1,6 @@
 //! ptrace compatibility layer for Redox OS
 
 use crate::platform::{types::*, PalPtrace, Sys};
-use core::ffi::VaList;
 
 pub const PTRACE_TRACEME: c_int = 0;
 pub const PTRACE_PEEKTEXT: c_int = 1;
@@ -23,7 +22,7 @@ pub const PTRACE_SYSEMU_SINGLESTEP: c_int = 32;
 
 // Can't use "params: ..." syntax, because... guess what? Cbingen again :(
 #[no_mangle]
-pub unsafe extern "C" fn sys_ptrace(request: c_int, mut params: VaList) -> c_int {
+pub unsafe extern "C" fn sys_ptrace(request: c_int, mut params: va_list<'_, '_>) -> c_int {
     // Musl also just grabs the arguments from the varargs...
     Sys::ptrace(request, params.arg(), params.arg(), params.arg())
 }

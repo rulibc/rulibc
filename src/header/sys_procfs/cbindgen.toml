@@ -5,3 +5,13 @@ style = "Tag"
 
 [enum]
 prefix_with_name = true
+
+[export]
+include = [
+    "psaddr_t",
+    "prgregset_t",
+    "prfpregset_t",
+    "lwpid_t",
+    "prstatus_t",
+    "prpsinfo_t",
+]

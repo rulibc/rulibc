@@ -94,7 +94,7 @@ pub extern "C" fn rust_eh_personality() {}
 #[lang = "oom"]
 #[linkage = "weak"]
 #[no_mangle]
-pub extern "C" fn rust_oom(layout: ::core::alloc::Layout) -> ! {
+pub fn rust_oom(layout: ::core::alloc::Layout) -> ! {
     use core::fmt::Write;
 
     let mut w = platform::FileWriter(2);

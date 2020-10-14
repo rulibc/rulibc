@@ -1,7 +1,6 @@
 use super::lookaheadreader::LookAheadReader;
-use crate::platform::types::*;
+use super::platform::types::*;
 use alloc::{string::String, vec::Vec};
-use core::ffi::VaList as va_list;
 
 #[derive(PartialEq, Eq)]
 enum IntKind {
@@ -27,9 +26,9 @@ unsafe fn next_byte(string: &mut *const c_char) -> Result<u8, c_int> {
 }
 
 unsafe fn inner_scanf(
-    mut r: LookAheadReader,
+    mut r: LookAheadReader<'_>,
     mut format: *const c_char,
-    mut ap: va_list,
+    mut ap: va_list<'_, '_>,
 ) -> Result<c_int, c_int> {
     let mut matched = 0;
     let mut byte = 0;
@@ -455,7 +454,7 @@ unsafe fn inner_scanf(
     Ok(matched)
 }
 
-pub unsafe fn scanf(r: LookAheadReader, format: *const c_char, ap: va_list) -> c_int {
+pub unsafe fn scanf(r: LookAheadReader<'_>, format: *const c_char, ap: va_list<'_, '_>) -> c_int {
     match inner_scanf(r, format, ap) {
         Ok(n) => n,
         Err(n) => n,
