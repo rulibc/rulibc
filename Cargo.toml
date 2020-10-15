@@ -7,38 +7,66 @@ edition = "2018"
 [lib]
 name = "rulibc"
 crate-type = ["staticlib"]
+bench = false
+test = false
 
 [workspace]
 members = ["src/crt0", "src/crti", "src/crtn", "src/ld_so"]
 exclude = ["tests"]
 
 [build-dependencies]
-cbindgen = "0.13.2"
-cc = "1.0.25"
+cc = "1.0"
 
 [dependencies]
-cbitset = "0.1.0"
-lazy_static = { version = "1.2.0", features = ["nightly", "spin_no_std"] }
-memoffset = "0.5.1"
-posix-regex = { path = "posix-regex", features = ["no_std"] }
-rand = { version = "0.5.5", default-features = false }
-memchr = { version = "2.2.0", default-features = false }
+compiler_builtins = {version = "0.1", optional = true}
+core = {version = "1.0", optional = true, package = "rustc-std-workspace-core"}
+alloc = {version = "1.0", optional = true, package = "rustc-std-workspace-alloc"}
 
-[dependencies.goblin]
-version = "0.0.21"
+
+cbitset = {version = "0.2.0", default-features = false, features = ["rustc-dep-of-std"]}
+lazy_static = {version = "1.4.0", default-features = false, features = ["rustc-dep-of-std", "spin_no_std"]}
+memchr = { version = "2.3", default-features = false, features = ["rustc-dep-of-std"]}
+memoffset = { version = "0.5.5", default-features = false, features = ["rustc-dep-of-std"]}
+posix-regex = { path = "posix-regex", features = ["no_std", "rustc-dep-of-std"] }
+rand = { version = "0.7.4", default-features = false, features = ["use_alloc", "rustc-dep-of-std"] }
+rand_xorshift = { version = "0.2.1", default-features = false, features = ["rustc-dep-of-std"] }
+rand_jitter = { version = "0.3.0", default-features = false, features = ["rustc-dep-of-std"] }
+
+# Dependencies of the `backtrace` crate
+addr2line = { version = "0.13.0", optional = true, default-features = false }
+rustc-demangle = { version = "0.1.4", features = ['rustc-dep-of-std'] }
+miniz_oxide = { version = "0.4.0", optional = true, default-features = false }
+
+panic_unwind = { path = "deps/rust/library/panic_unwind", optional = true }
+
+[dependencies.object]
+version = "0.20"
+optional = true
 default-features = false
-features = ["elf32", "elf64", "endian_fd"]
+features = ['read_core', 'elf', 'macho', 'pe']
 
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sc = "0.2.3"
 
 [target.'cfg(target_os = "redox")'.dependencies]
-redox_syscall = { git = "https://gitlab.redox-os.org/redox-os/syscall", rev = "4115e0f43547449ce56f7d7749732813e9505955" }
-spin = "0.4.10"
+redox_syscall = { path="deps/redox_syscall" }
+spin = "0.6.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "rustc-dep-of-std"]}
 
 [features]
-default = []
+default = ["backtrace", "rustc-dep-of-std"]
+backtrace = [
+  "gimli-symbolize",
+  'addr2line/rustc-dep-of-std',
+  'object/rustc-dep-of-std',
+  'miniz_oxide/rustc-dep-of-std',
+]
+gimli-symbolize = []
+# Unstable feature to support being a libstd dependency
+rustc-dep-of-std = ["compiler_builtins", "core", "alloc"]
 trace = []
 
 [profile.dev]
@@ -46,3 +74,25 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+[patch.crates-io]
+# See comments in `library/rustc-std-workspace-core/README.md` for what's going on
+# here
+rustc-std-workspace-core = { path = 'deps/rust/library/rustc-std-workspace-core' }
+rustc-std-workspace-alloc = { path = 'deps/rust/library/rustc-std-workspace-alloc' }
+# rustc-std-workspace-std = { path = 'deps/rust/library/rustc-std-workspace-std' }
+
+winapi = {path="deps/winapi-rs" }
+num-traits = {path="deps/num-traits"}
+cbitset = {path="deps/cbitset"}
+lazy_static = {path="deps/lazy-static.rs"}
+spin = {path="deps/spin-rs"}
+memchr = {path="deps/rust-memchr"}
+memoffset = {path="deps/memoffset"}
+rand = {path="deps/rand"}
+rand_core = {path="deps/rand/rand_core"}
+libm = {path="deps/libm"}
+rand_xorshift = {path="deps/rngs/rand_xorshift"}
+rand_jitter = {path="deps/rngs/rand_jitter"}
+bitflags = {path="deps/bitflags"}
+sc = {path="deps/syscall.rs"}
