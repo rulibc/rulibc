@@ -7,3 +7,45 @@
 [submodule "pthreads-emb"]
 	path = pthreads-emb
 	url = https://gitlab.redox-os.org/redox-os/pthreads-emb.git
+[submodule "deps/cbitset"]
+	path = deps/cbitset
+	url = https://gitlab.redox-os.org/lygstate/cbitset.git
+[submodule "deps/lazy-static.rs"]
+	path = deps/lazy-static.rs
+	url = https://github.com/rulibc/lazy-static.rs.git
+[submodule "deps/libm"]
+	path = deps/libm
+	url = https://github.com/rulibc/libm.git
+[submodule "deps/memoffset"]
+	path = deps/memoffset
+	url = https://github.com/rulibc/memoffset.git
+[submodule "deps/num-traits"]
+	path = deps/num-traits
+	url = https://github.com/rulibc/num-traits.git
+[submodule "deps/rand"]
+	path = deps/rand
+	url = https://github.com/rulibc/rand.git
+[submodule "deps/rngs"]
+	path = deps/rngs
+	url = https://github.com/rulibc/rngs.git
+[submodule "deps/rust"]
+	path = deps/rust
+	url = https://github.com/rulibc/rust.git
+[submodule "deps/rust-memchr"]
+	path = deps/rust-memchr
+	url = https://github.com/rulibc/rust-memchr.git
+[submodule "deps/spin-rs"]
+	path = deps/spin-rs
+	url = https://github.com/rulibc/spin-rs.git
+[submodule "deps/winapi-rs"]
+	path = deps/winapi-rs
+	url = https://github.com/rulibc/winapi-rs.git
+[submodule "deps/bitflags"]
+	path = deps/bitflags
+	url = https://github.com/rulibc/bitflags.git
+[submodule "deps/syscall.rs"]
+	path = deps/syscall.rs
+	url = https://github.com/rulibc/syscall.rs.git
+[submodule "deps/redox_syscall"]
+	path = deps/redox_syscall
+	url = https://gitlab.redox-os.org/lygstate/syscall.git
