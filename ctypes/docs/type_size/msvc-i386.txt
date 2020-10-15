@@ -19,11 +19,12 @@ sizeof unsigned short:2 is_unsigned:1
 sizeof unsigned long long:8 is_unsigned:1
 sizeof intmax_t:8 is_unsigned:0
 sizeof uintmax_t:8 is_unsigned:1
-sizeof size_t:4 is_unsigned:1
-sizeof ptrdiff_t:4 is_unsigned:0
-sizeof intptr_t:4 is_unsigned:0
-sizeof uintptr_t:4 is_unsigned:1
+sizeof size_t:8 is_unsigned:1
+sizeof ptrdiff_t:8 is_unsigned:0
+sizeof intptr_t:8 is_unsigned:0
+sizeof uintptr_t:8 is_unsigned:1
 sizeof wchar_t:2 is_unsigned:1
 sizeof wint_t:2 is_unsigned:1
 sizeof wctype_t:2 is_unsigned:1
 WEOF:65535
+long double size:8

@@ -28,3 +28,4 @@ sizeof wchar_t:2 is_unsigned:1
 sizeof wint_t:4 is_unsigned:1
 sizeof wctype_t:4 is_unsigned:0
 WEOF:4294967295
+long double size:16
