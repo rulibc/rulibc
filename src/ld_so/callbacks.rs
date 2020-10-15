@@ -1,6 +1,5 @@
 use super::linker::{Linker, Symbol, DSO};
 use alloc::boxed::Box;
-use goblin::error::Result;
 
 pub struct LinkerCallbacks {
     pub unload: Box<dyn Fn(&mut Linker, usize)>,

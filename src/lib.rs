@@ -28,8 +28,6 @@
 
 #[macro_use]
 extern crate alloc;
-#[cfg(not(target_os = "windows"))]
-extern crate goblin;
 #[macro_use]
 extern crate lazy_static;
 

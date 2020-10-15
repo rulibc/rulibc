@@ -10,15 +10,6 @@ use core::{
     mem::{size_of, swap, transmute},
     ptr, slice,
 };
-use goblin::{
-    elf::{
-        header::ET_DYN,
-        program_header,
-        r#dyn::{Dyn, DT_DEBUG, DT_RUNPATH},
-        reloc, sym, Elf,
-    },
-    error::{Error, Result},
-};
 
 use crate::{
     c_str::CString,
