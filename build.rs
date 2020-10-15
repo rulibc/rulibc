@@ -53,7 +53,8 @@ fn main() {
             generate_bindings(&p);
         });
 
-    cc::Build::new()
+    let mut build = cc::Build::new();
+    build
         .flag("-nostdinc")
         .flag("-nostdlib")
         .include(&format!("{}/include", crate_dir))
