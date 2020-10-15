@@ -35,5 +35,12 @@ The motivation for this project is:
 ## Developing
 ```
 cargo install --force cargo-make
-cargo make
+```
+Build debug version
+```
+cargo make build
+```
+Build release version
+```
+cargo make build --profile production
 ```
