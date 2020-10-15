@@ -1,0 +1,33 @@
+name: Rust
+
+on: push
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  msvc-build:
+    name: MSVC (Windows)
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        profile: ['production', 'development']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Checkout other
+        env:
+          MSYS: winsymlinks:nativestrict
+          MSYSTEM: MINGW64
+          CHERE_INVOKING: 1
+        run: |
+          C:\msys64\usr\bin\bash.exe -lc "export"
+          C:\msys64\usr\bin\bash.exe -lc "ls -la"
+          cd deps\rust
+          git submodule update --progress --init -- "library/backtrace"
+          git submodule update --progress --init -- "library/stdarch"
+      - name: Install
+        run: cargo install --force cargo-make
+      - name: Build and tests
+        run: cargo make --profile ${{ matrix.profile }}

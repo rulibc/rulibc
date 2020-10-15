@@ -47,12 +47,15 @@ args = ["clean"]
 
 [tasks.test]
 workspace=false
-disabled = true
+command = "rustc"
+args = ["--version"]
+
+dependencies = ["rulibc_test"]
 
 [tasks.build]
 command = "rustc"
 args = ["--version"]
-dependencies = ["crt", "rulibc_make", "run_test"]
+dependencies = ["crt", "rulibc_make"]
 
 [tasks.crt]
 workspace=false
@@ -75,8 +78,7 @@ cargo build -Z unstable-options ${BUILD_TYPE_CARGO_ARG} ${CARGOFLAGS} --out-dir 
 '''
 ]
 
-[tasks.run_test]
-workspace=false
+[tasks.rulibc_test]
 script_runner = "@shell"
 script = [
 '''
